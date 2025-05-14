@@ -1,0 +1,56 @@
+.card-paratext{
+    color: #9DA8B0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom:5px ;
+}
+.card-idno{
+    color: #9DA8B0;
+    font-size: small;
+}
+.edit-pen-icon{
+    color: #3393FF;
+}
+.card-inside-text{
+    color: #97A2AB;
+}
+
+.profile-card{
+    height: 80px !important;
+}
+
+.cardWrapper {
+    border-radius: 12px;
+    background-color: #f9f9ff;
+    padding: 12px;
+    font-family: "Segoe UI", sans-serif;
+  }
+
+
+  .custom-thead {
+
+    --bs-table-border-color:#4B565B !important;
+    text-align: left;
+  
+    }
+
+    .custom-thead th {
+        font-weight: 400;
+        background-color: #F8F9FA !important;
+      }
+
+      .custom-tbody tr td {
+        /* color: #4B565B !important; */
+        
+      }
+    .custom-td{
+        color: #4B565B !important;
+    }
+
+      .custom-tbody tr{
+        text-align: left;
+      }
+
+      .custom-tbody span {
+        color: #4B565B !important;
+      }
