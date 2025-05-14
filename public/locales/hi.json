@@ -1,0 +1,49 @@
+{
+  "welcome": "हमारे एप्लिकेशन में आपका स्वागत है!",
+  "changeLanguage": "भाषा बदलें",
+  "greeting": "नमस्ते, विद्यार्थी!",
+  "next": "अगला",
+  "previous": "पिछला",
+  "submit": "प्रस्तुत करें",
+
+  "studentform": {
+    "personal": "व्यक्तिगत",
+    "academic": "शैक्षणिक",
+    "skills": "कौशल",
+    "firstname": "पहला नाम",
+    "lastname": "अंतिम नाम",
+    "email": "ईमेल",
+    "mobile": "मोबाइल",
+    "website": "वेबसाइट",
+    "headline": "शीर्षक",
+    "joinyear": "प्रवेश वर्ष",
+    "completeyear": "पूर्ण वर्ष",
+
+    "joinyearvalidation": "कृपया प्रवेश वर्ष दर्ज करें",
+    "completeyearvalidation": "कृपया पूर्ण वर्ष दर्ज करें",
+
+    "firstnamevalidation": "कृपया अपना पहला नाम दर्ज करें",
+    "lastnamevalidation": "कृपया अपना अंतिम नाम दर्ज करें",
+    "emailvalidation": "कृपया अपना ईमेल दर्ज करें",
+    "mobilevalidation": "कृपया अपना मोबाइल नंबर दर्ज करें",
+    "websitevalidation": "कृपया अपनी वेबसाइट दर्ज करें",
+    "headlinevalidation": "कृपया अपनी हेडलाइन दर्ज करें",
+    "invalidemail": "अमान्य ईमेल",
+
+    "college": "कॉलेज",
+    "degree": "डिग्री",
+    "department": "विभाग",
+    "course": "कोर्स",
+
+    "collegevalidation": "कृपया कॉलेज दर्ज करें",
+    "degreevalidation": "कृपया डिग्री दर्ज करें",
+    "departmentvalidation": "कृपया विभाग दर्ज करें",
+    "coursevalidation": "कृपया कोर्स दर्ज करें",
+
+    "softskills": "मुलायम कौशल",
+    "technicalskills": "तकनीकी कौशल",
+
+    "softskillsvalidation": "कृपया मुलायम कौशल का चयन करें",
+    "technicalskillsvalidation": "कृपया तकनीकी कौशल का चयन करें"
+  }
+}

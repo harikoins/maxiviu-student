@@ -9,6 +9,8 @@ import {
 } from "react-router-dom";
 import Index  from "./core/Index.tsx";
 import Login from './core/Login.tsx';
+import StudentForm from './pages/student-form/index.tsx';
+import './i18n';
 
 const router = createBrowserRouter([
   {
@@ -18,6 +20,10 @@ const router = createBrowserRouter([
       {
         path : '',
         element : <Login/>
+      },
+      {
+        path : '/student-form',
+        element : <StudentForm/>
       }
     ]
   },
