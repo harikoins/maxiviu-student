@@ -5,7 +5,8 @@ export interface courseType {
   name: string;
   description: string;
   department_id: number;
-  department_courses ?: number
+  department_courses ?: number;
+  value:string;
 }
 
 interface PaginatedResponse<T> {

@@ -4,6 +4,8 @@ import axios from '../config/axiosInstance';
 export interface degreeType {
   id: number;
   name: string;
+  value:string;
+  label: string;
 }
 
 interface PaginatedResponse<T> {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Steps,
   Button,
@@ -7,18 +7,131 @@ import {
   AutoComplete,
   DatePicker,
   Select,
+  message,
+  notification,
 } from "antd";
 import useCustomTranslation from "../../hooks/useTranslation";
+import { setUser, type UserType } from "../../signals/userSignals";
+import type { courseType } from "../../services/courseService";
+import type { departmentType } from "../../services/departmentService";
+import type { degreeType } from "../../services/degreeService";
+import { getcoursePage } from "../../services/courseService";
+import { getdepartmentPage } from "../../services/departmentService";
+import { getdegreePage } from "../../services/degreeService";
+import { createstudent } from "../../services/studentService";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
 const { Step } = Steps;
 
 const StudentForm: React.FC = () => {
+  const navigate = useNavigate();
+  interface dropdownType {
+    courses: {
+      options: courseType[];
+      selectedValue: number | null;
+    };
+    departments: {
+      options: departmentType[];
+      selectedValue: number | null;
+    };
+    degrees: {
+      options: degreeType[];
+      selectedValue: number | null;
+    };
+  }
+
+  const [dropdown, setDropdown] = useState<dropdownType>({
+    courses: { options: [], selectedValue: null },
+    departments: { options: [], selectedValue: null },
+    degrees: { options: [], selectedValue: null },
+  });
+
+  async function fetchApis() {
+    try {
+      // Fetch all data concurrently
+      const [course, departments, degrees] = await Promise.all([
+        getcoursePage(0, 0),
+        getdepartmentPage(0, 0),
+        getdegreePage(0, 0),
+      ]);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transformItems = (items: any[]) =>
+        items?.map((item) => ({
+          ...item,
+          value: item?.name,
+          label: item?.name,
+        })) || [];
+
+      // Update the dropdown state with the transformed data
+      setDropdown((prev) => ({
+        ...prev,
+        courses: {
+          options: transformItems(course.items),
+          selectedValue: null,
+        },
+        departments: {
+          options: transformItems(departments.items),
+          selectedValue: null,
+        },
+        degrees: {
+          options: transformItems(degrees.items),
+          selectedValue: null,
+        },
+      }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Failed to fetch API data:", error);
+
+      notification.error({
+        message: "API Error",
+        description: error.message || "An unexpected error occurred.",
+        placement: "topRight",
+      });
+    }
+  }
+
+  useEffect(() => {
+    fetchApis();
+  }, []);
+
   const { t } = useCustomTranslation();
   const [current, setCurrent] = useState(0);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<any>({});
+
+  const [loggedUserDetails, setLoggedUserDetails] = useState<UserType | null>(
+    null
+  );
+  useEffect(() => {
+    // Get URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const username = params.get("username");
+    const email = params.get("email");
+    const id = Number(params.get("id"));
+    const studentid = Number(params.get("studentid"));
+
+    if (token && username && email && id) {
+      const loginuser: UserType = {
+        username,
+        email,
+        accessToken: token,
+        id,
+        studentid
+      };
+
+      // Set user data and token
+      setUser(loginuser);
+      setLoggedUserDetails(loginuser);
+      localStorage.setItem("maxiviu_student", JSON.stringify(loginuser));
+
+      message.success("Logged in with Google!");
+    }
+  }, []);
 
   const technicalSkills = [
     "Communication",
@@ -112,7 +225,7 @@ const StudentForm: React.FC = () => {
       ),
     },
     {
-      title:  t("studentform.academic"),
+      title: t("studentform.academic"),
       content: (
         <Form
           layout="vertical"
@@ -151,11 +264,18 @@ const StudentForm: React.FC = () => {
           >
             <AutoComplete
               placeholder="BE"
-              options={[
-                { value: "B.Sc Computer Science" },
-                { value: "B.Tech Information Technology" },
-                { value: "B.A English" },
-              ]}
+              options={dropdown?.degrees?.options}
+              onSelect={(value) => {
+                const selected = dropdown.degrees.options.find(
+                  (item) => item.name === value
+                );
+                if (selected) {
+                  setDropdown((prev) => ({
+                    ...prev,
+                    degrees: { ...prev.degrees, selectedValue: selected.id }, // Store the ID
+                  }));
+                }
+              }}
               filterOption={(inputValue, option) =>
                 option?.value
                   .toLowerCase()
@@ -177,11 +297,21 @@ const StudentForm: React.FC = () => {
           >
             <AutoComplete
               placeholder="Computer Science"
-              options={[
-                { value: "Computer Science" },
-                { value: "Mechanical Engineering" },
-                { value: "Electrical Engineering" },
-              ]}
+              options={dropdown?.departments?.options}
+              onSelect={(value) => {
+                const selected = dropdown.departments.options.find(
+                  (item) => item.name === value
+                );
+                if (selected) {
+                  setDropdown((prev) => ({
+                    ...prev,
+                    departments: {
+                      ...prev.departments,
+                      selectedValue: selected.id,
+                    }, // Store the ID
+                  }));
+                }
+              }}
               filterOption={(inputValue, option) =>
                 option?.value
                   .toLowerCase()
@@ -200,11 +330,21 @@ const StudentForm: React.FC = () => {
           >
             <AutoComplete
               placeholder="M.Tech (AI/ML)"
-              options={[
-                { value: "M.Tech (AI/ML)" },
-                { value: "M.Tech (CAD/CAM)" },
-                { value: "M.Tech (Power Engg.)" },
-              ]}
+              options={dropdown?.courses?.options}
+              onSelect={(value) => {
+                const selected = dropdown.courses.options.find(
+                  (item) => item.name === value
+                );
+                if (selected) {
+                  setDropdown((prev) => ({
+                    ...prev,
+                    courses: {
+                      ...prev.courses,
+                      selectedValue: selected.id,
+                    }, // Store the ID
+                  }));
+                }
+              }}
               filterOption={(inputValue, option) =>
                 option?.value
                   .toLowerCase()
@@ -253,7 +393,7 @@ const StudentForm: React.FC = () => {
     },
 
     {
-      title:  t("studentform.skills"),
+      title: t("studentform.skills"),
       content: (
         <Form
           layout="vertical"
@@ -327,13 +467,56 @@ const StudentForm: React.FC = () => {
         </Form>
       ),
     },
-    
   ];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleFormSubmit = (values: any, step: number) => {
-    setFormData({ ...formData, ...values });
-    if (step < steps.length - 1) setCurrent(step + 1);
+  const handleFormSubmit = async (values: any, step: number) => {
+    const updatedFormData = { ...formData, ...values };
+
+    if (updatedFormData.joinYear?.year) {
+      updatedFormData.joinYear = updatedFormData.joinYear.year();
+    }
+    if (updatedFormData.completeYear?.year) {
+      updatedFormData.completeYear = updatedFormData.completeYear.year();
+    }
+
+    setFormData(updatedFormData);
+
+    if (step < steps.length - 1) {
+      setCurrent(step + 1);
+    } else {
+      const finalData = {
+        ...updatedFormData,
+        join_year: updatedFormData.joinYear,
+        complete_year: updatedFormData.completeYear,
+        user_id: loggedUserDetails?.id,
+        department_id: dropdown?.departments?.selectedValue,
+        degree_id: dropdown?.degrees?.selectedValue,
+        course_id: dropdown?.courses?.selectedValue,
+        pphoneno: updatedFormData.mobile,
+        sphoneno: updatedFormData.mobile,
+      };
+      try {
+        const response = await createstudent(finalData);
+
+        if (response?.id) {
+          navigate("/dashboard");
+        } else {
+          notification.error({
+            message: "Error",
+            description: "An unexpected error occurred. Please try again.",
+            placement: "topRight",
+          });
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        notification.error({
+          message: "Submission Failed",
+          description: error?.message || "An unexpected error occurred.",
+          placement: "topRight",
+        });
+      }
+    }
   };
 
   const prev = () => setCurrent(current - 1);
@@ -342,7 +525,7 @@ const StudentForm: React.FC = () => {
     <div style={{ width: "700px", margin: "auto" }}>
       <Steps current={current} style={{ marginBottom: 20 }}>
         {steps.map((item) => (
-          <Step key={item.title} title={item.title} />
+          <Step key={item.title} title={item.title} onClick={() => {}} />
         ))}
       </Steps>
       <div>{steps[current].content}</div>

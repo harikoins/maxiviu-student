@@ -5,6 +5,7 @@ export interface departmentType {
   id: number;
   name: string;
   description: string;
+  value:string;
   Department_course ?: {
     id : number
   }
