@@ -1,7 +1,6 @@
 import React from 'react';
 import { Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 
 
 const { Header, Content, Footer } = Layout;
@@ -26,7 +25,6 @@ const App: React.FC = () => {
         <div className="logo" style={{ color: 'white', fontSize: '24px', fontWeight: 'bold' }}>
           Maxivu
         </div>
-        <LanguageSwitcher/>
         {/* Other header content or navigation can go here */}
       </Header>
       <Content style={{ padding: '20px' }}>

@@ -4,9 +4,9 @@ import Index from "./core/Index.tsx";
 import Login from "./core/Login.tsx";
 import StudentForm from "./pages/student-form/index.tsx";
 import DashBoard from "./pages/dashboard/index.tsx";
-import "./i18n";
 
 function App() {
+
 
   const router = createBrowserRouter([
     {

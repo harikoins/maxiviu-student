@@ -10,7 +10,6 @@ import {
   message,
   notification,
 } from "antd";
-import useCustomTranslation from "../../hooks/useTranslation";
 import { setUser, type UserType } from "../../signals/userSignals";
 import type { courseType } from "../../services/courseService";
 import type { departmentType } from "../../services/departmentService";
@@ -97,7 +96,6 @@ const StudentForm: React.FC = () => {
     fetchApis();
   }, []);
 
-  const { t } = useCustomTranslation();
   const [current, setCurrent] = useState(0);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -154,7 +152,7 @@ const StudentForm: React.FC = () => {
 
   const steps = [
     {
-      title: t("studentform.personal"),
+      title: "Personal",
       content: (
         <Form
           layout="vertical"
@@ -162,70 +160,70 @@ const StudentForm: React.FC = () => {
         >
           <Form.Item
             name="firstname"
-            label={t("studentform.firstname")}
+            label="First Name"
             rules={[
-              { required: true, message: t("studentform.firstnamevalidation") },
+              { required: true, message: "Please enter first name" },
             ]}
           >
             <Input placeholder="John Doe" />
           </Form.Item>
           <Form.Item
             name="lastname"
-            label={t("studentform.lastname")}
+            label="Last Name"
             rules={[
-              { required: true, message: t("studentform.lastnamevalidation") },
+              { required: true, message: "Please enter last name" },
             ]}
           >
             <Input placeholder="John Doe" />
           </Form.Item>
           <Form.Item
             name="mobile"
-            label={t("studentform.mobile")}
+            label="Mobile"
             rules={[
-              { required: true, message: t("studentform.mobilevalidation") },
+              { required: true, message: "Please enter mobile" },
             ]}
           >
             <Input placeholder="9878878787" type="number" />
           </Form.Item>
           <Form.Item
             name="headline"
-            label={t("studentform.headline")}
+            label="Headline"
             rules={[
-              { required: true, message: t("studentform.headlinevalidation") },
+              { required: true, message: "Please enter headline" },
             ]}
           >
             <Input placeholder="Software Engineer" />
           </Form.Item>
           <Form.Item
             name="website"
-            label={t("studentform.website")}
+            label="Website"
             rules={[
-              { required: true, message: t("studentform.websitevalidation") },
+              { required: true, message: "Please enter website" },
             ]}
           >
             <Input placeholder="johnportfolio.com" />
           </Form.Item>
           <Form.Item
             name="email"
-            label={t("studentform.email")}
+            label="Email"
             rules={[
               {
                 required: true,
                 type: "email",
-                message: t("studentform.invalidemail"),
+                message: "Please enter valid email",
               },
             ]}
           >
             <Input placeholder="john@example.com" />
           </Form.Item>
           <Button type="primary" htmlType="submit">
-            {t("next")}
+            Next
           </Button>
         </Form>
       ),
     },
     {
-      title: t("studentform.academic"),
+      title: "Academic",
       content: (
         <Form
           layout="vertical"
@@ -234,9 +232,9 @@ const StudentForm: React.FC = () => {
           {/* College Field */}
           <Form.Item
             name="college"
-            label={t("studentform.college")}
+            label="College"
             rules={[
-              { required: true, message: t("studentform.collegevalidation") },
+              { required: true, message: "Please select college" },
             ]}
           >
             <AutoComplete
@@ -257,9 +255,9 @@ const StudentForm: React.FC = () => {
           {/* Degree Field */}
           <Form.Item
             name="degree"
-            label={t("studentform.degree")}
+            label="Degree"
             rules={[
-              { required: true, message: t("studentform.degreevalidation") },
+              { required: true, message: "Please select degree" },
             ]}
           >
             <AutoComplete
@@ -287,11 +285,11 @@ const StudentForm: React.FC = () => {
           {/* Department Field */}
           <Form.Item
             name="department"
-            label={t("studentform.department")}
+            label="Department"
             rules={[
               {
                 required: true,
-                message: t("studentform.departmentvalidation"),
+                message: "Please select department",
               },
             ]}
           >
@@ -323,9 +321,9 @@ const StudentForm: React.FC = () => {
           {/* Course Field */}
           <Form.Item
             name="course"
-            label={t("studentform.course")}
+            label="Course"
             rules={[
-              { required: true, message: t("studentform.coursevalidation") },
+              { required: true, message: "Please select course" },
             ]}
           >
             <AutoComplete
@@ -355,9 +353,9 @@ const StudentForm: React.FC = () => {
 
           <Form.Item
             name="joinYear"
-            label={t("studentform.joinyear")}
+            label="Join Year"
             rules={[
-              { required: true, message: t("studentform.joinyearvalidation") },
+              { required: true, message: "Please select join year" },
             ]}
           >
             <DatePicker
@@ -370,11 +368,11 @@ const StudentForm: React.FC = () => {
           {/* Complete Year Field using DatePicker (Year Picker) */}
           <Form.Item
             name="completeYear"
-            label={t("studentform.completeyear")}
+            label="Complete Year"
             rules={[
               {
                 required: true,
-                message: t("studentform.completeyearvalidation"),
+                message: "Please select complete year",
               },
             ]}
           >
@@ -386,14 +384,14 @@ const StudentForm: React.FC = () => {
           </Form.Item>
 
           <Button type="primary" htmlType="submit">
-            {t("next")}
+            Next
           </Button>
         </Form>
       ),
     },
 
     {
-      title: t("studentform.skills"),
+      title: "Skills",
       content: (
         <Form
           layout="vertical"
@@ -401,11 +399,11 @@ const StudentForm: React.FC = () => {
         >
           <Form.Item
             name="softskills"
-            label={t("studentform.softskills")}
+            label="Soft Skills"
             rules={[
               {
                 required: true,
-                message: t("studentform.softskillsvalidation"),
+                message: "Please select soft skills",
               },
             ]}
           >
@@ -432,11 +430,11 @@ const StudentForm: React.FC = () => {
           </Form.Item>
           <Form.Item
             name="technicalskills"
-            label={t("studentform.technicalskills")}
+            label="Technical Skills"
             rules={[
               {
                 required: true,
-                message: t("studentform.technicalskillsvalidation"),
+                message: "Please select technical skills",
               },
             ]}
           >
@@ -462,7 +460,7 @@ const StudentForm: React.FC = () => {
             </Select>
           </Form.Item>
           <Button type="primary" htmlType="submit">
-            {t("submit")}
+            Submit
           </Button>
         </Form>
       ),
@@ -532,7 +530,7 @@ const StudentForm: React.FC = () => {
       <div style={{ marginTop: 20 }}>
         {current > 0 && (
           <Button onClick={prev} style={{ marginRight: 8 }}>
-            {t("previous")}
+            Previous
           </Button>
         )}
       </div>

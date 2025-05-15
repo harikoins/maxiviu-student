@@ -66,3 +66,8 @@ export const updatestudent = async (
 export const deletestudent = async (id: number): Promise<void> => {
   await axios.delete(`/students/${id}`);
 };
+
+export const getstudent = async (id: number): Promise<studentType> => {
+  const res = await axios.get(`/students/${id}`);
+  return res.data;
+};
