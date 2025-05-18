@@ -1,6 +1,29 @@
 import axios from "../config/axiosInstance";
 
+interface userDetails {
+  id: number;
+  email: string;
+  name: string;
+}
+
+interface Department {
+  id: number;
+  name: string;
+}
+
+interface Degree {
+  id: number;
+  name: string;
+}
+
+interface Course {
+  id: number;
+  name: string;
+}
+
 export interface studentType {
+  // items:studentType;
+  id: number;
   firstname: string;
   lastname: string;
   headline: string;
@@ -8,15 +31,15 @@ export interface studentType {
   website: string;
   join_year: string;
   complete_year: string;
-  mygoal: string;
-  mystory: string;
-  myachievement: string;
-  profile_linkedin: string;
-  profile_behance: string;
-  profile_card: string;
-  profile_github: string;
-  pphoneno: string;
-  sphoneno: string;
+  mygoal?: string;  // Made optional
+  mystory?: string; // Made optional
+  myachievement?: string; // Made optional
+  profile_linkedin?: string;
+  profile_behance?: string;
+  profile_card?: string;
+  profile_github?: string;
+  pphoneno?: string;
+  sphoneno?: string;
   college_id: number;
   user_id: number;
   department_id: number;
@@ -25,10 +48,12 @@ export interface studentType {
   state_id: number;
   country_id: number;
   course_id: number;
-  id: number;
   status: number;
+  user: userDetails;
+  department: Department;
+  degree: Degree;
+  course: Course;
 }
-
 interface PaginatedResponse<T> {
   items: T[];
   total: number;

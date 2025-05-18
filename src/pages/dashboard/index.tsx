@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Col, Row, Layout, message, notification } from "antd";
 import ExtracurricularActivities from "./ExtraCurricularActivities";
 import RightSideCards from "./RightSideCard";
@@ -7,16 +7,15 @@ import StoryCards from "./StoryCard";
 import UserCard from "./UserCard";
 import VideoCard from "./VideoCard";
 import { setUser, type UserType } from "../../signals/userSignals";
-import { getstudent } from "../../services/studentService";
-import type { studentType } from "../../services/studentService";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { fetchUserData } from "../../services/userService";
+import { useSignals } from "@preact/signals-react/runtime";
 
 const { Content } = Layout;
 
 const ProfileDashboard: React.FC = () => {
-  const [userDatas, setUserDatas] = useState<studentType | null>(null);
+  useSignals();
 
-  const fetchUserData = async () => {
+  const fetchUser = async () => {
     try {
       // Safely retrieve and parse the user data from local storage
       const storedUser = localStorage.getItem("komaxiviustudent");
@@ -42,20 +41,8 @@ const ProfileDashboard: React.FC = () => {
       if (!userid) {
         throw new Error("Invalid user ID.");
       }
+      fetchUserData(userid);
 
-      // Fetch user data using the API
-      const response = await getstudent(userid);
-
-      console.log(response, "response");
-
-      if (response && response.items) {
-        setUserDatas(response.items);
-      } else {
-        notification.error({
-          message: "Fetch Error",
-          description: "User data not found.",
-        });
-      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       notification.error({
@@ -67,7 +54,7 @@ const ProfileDashboard: React.FC = () => {
 
   // Automatically fetch user data on component mount
   useEffect(() => {
-    fetchUserData();
+    fetchUser();
   }, []);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -107,7 +94,7 @@ const ProfileDashboard: React.FC = () => {
           <Col md={16}>
             <Row gutter={[16, 16]}>
               <Col span={24}>
-                <StoryCards />
+                <StoryCards onUpdate={fetchUser}/>
               </Col>
               <Col span={24}>
                 <SkillsComponent />

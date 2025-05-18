@@ -3,6 +3,10 @@
   width: 100%;
 }
 
+.ant-message {
+    z-index: 1055 !important;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

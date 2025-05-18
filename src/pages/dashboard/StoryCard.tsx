@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Typography, Space, Col, Row } from "antd";
 import {
   EditOutlined,
@@ -7,27 +7,40 @@ import {
   BookOutlined,
 } from "@ant-design/icons";
 import styles from "../../components/styles/Dashboard.module.css";
+import { userDatas } from "../../stores/userStore";
+import StoryCardsDrawer from "./StoryCardsDrawer";
 
 const { Title, Text } = Typography;
 
-const achievements = [
-  "Problem-Solving",
-  "Strategic Thinking",
-  "Tech Integration",
-  "Continuous Improvement",
-  "Collaborative Innovation",
-];
+interface StoryCardProps {
+  onUpdate: () => void;
+}
 
-const StoryCards: React.FC = () => {
+const StoryCards: React.FC<StoryCardProps> = ({onUpdate}) => {
+  const [open, setOpen] = useState(false);
+
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    setOpen(false);
+  };
+
   return (
     <>
       {/* My Story Card */}
       <Row gutter={[16, 16]}>
-        <Col span={8} >
+        <Col xs={24} sm={12} md={24} lg={18} xl={8}>
           <Card className="rounded-4 mt-3">
             <Card.Meta
               title={
-                <div className="d-flex align-items-center gap-2 justify-content-between">
+                <div
+                  className="d-flex align-items-center gap-2 justify-content-between"
+                  onClick={() => {
+                    // console.log(userData,"userData")
+                  }}
+                >
                   <Space>
                     <BookOutlined style={{ color: "#3393FF" }} />
                     <Title level={4} style={{ margin: 0 }}>
@@ -37,14 +50,13 @@ const StoryCards: React.FC = () => {
                   <EditOutlined
                     className={styles["edit-pen-icon"]}
                     style={{ fontSize: "1.25rem" }}
+                    onClick={showDrawer}
                   />
                 </div>
               }
               description={
                 <Text className={styles["card-inside-text"]}>
-                  Aspiring software engineer with a passion for AI and machine
-                  learning. Committed to solving real-world problems through
-                  technology.
+                  {userDatas?.value?.mystory ?? "Not added yet"}
                 </Text>
               }
             />
@@ -52,7 +64,7 @@ const StoryCards: React.FC = () => {
         </Col>
 
         {/* My Goals Card */}
-        <Col span={8}>
+        <Col xs={24} sm={12} md={24} lg={18} xl={8}>
           <Card className="rounded-4 mt-3">
             <Card.Meta
               title={
@@ -66,14 +78,13 @@ const StoryCards: React.FC = () => {
                   <EditOutlined
                     className={styles["edit-pen-icon"]}
                     style={{ fontSize: "1.25rem" }}
+                    onClick={showDrawer}
                   />
                 </div>
               }
               description={
                 <Text className={styles["card-inside-text"]}>
-                  Data Scientist, Full-Stack Developer, AI Developer, Database
-                  Developer, AI/ML Web Application Developer, Data Engineer,
-                  Back-End Developer, NLP Engineer.
+                  {userDatas?.value?.mygoal ?? "Not added yet"}
                 </Text>
               }
             />
@@ -81,11 +92,8 @@ const StoryCards: React.FC = () => {
         </Col>
 
         {/* My Achievements Card */}
-        <Col span={8}>
-          <Card
-            className="rounded-4 mt-3"
-        
-          >
+        <Col xs={24} sm={12} md={24} lg={18} xl={8}>
+          <Card className="rounded-4 mt-3">
             <Card.Meta
               title={
                 <div className="d-flex align-items-center gap-2 justify-content-between">
@@ -98,22 +106,20 @@ const StoryCards: React.FC = () => {
                   <EditOutlined
                     className={styles["edit-pen-icon"]}
                     style={{ fontSize: "1.25rem" }}
+                    onClick={showDrawer}
                   />
                 </div>
               }
               description={
-                <ul className="list-unstyled" style={{ paddingLeft: 20 }}>
-                  {achievements.map((item) => (
-                    <li key={item} className="d-flex align-items-center gap-2">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <Text className={styles["card-inside-text"]}>
+                  {userDatas?.value?.myachievement ?? "Not added yet"}
+                </Text>
               }
             />
           </Card>
         </Col>
       </Row>
+      <StoryCardsDrawer open={open} onClose={onClose} onUpdate={onUpdate}/>
     </>
   );
 };

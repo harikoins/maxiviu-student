@@ -104,22 +104,22 @@ const StudentForm: React.FC = () => {
   const [loggedUserDetails, setLoggedUserDetails] = useState<UserType | null>(
     null
   );
-  useEffect(() => {
-    // Get URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    const username = params.get("username");
-    const email = params.get("email");
-    const id = Number(params.get("id"));
-    const studentid = Number(params.get("studentid"));
 
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  const username = params.get("username");
+  const email = params.get("email");
+  const id = Number(params.get("id"));
+  const studentid = Number(params.get("studentid"));
+
+  useEffect(() => {
     if (token && username && email && id) {
       const loginuser: UserType = {
         username,
         email,
         accessToken: token,
         id,
-        studentid
+        studentid,
       };
 
       // Set user data and token
@@ -161,45 +161,35 @@ const StudentForm: React.FC = () => {
           <Form.Item
             name="firstname"
             label="First Name"
-            rules={[
-              { required: true, message: "Please enter first name" },
-            ]}
+            rules={[{ required: true, message: "Please enter first name" }]}
           >
             <Input placeholder="John Doe" />
           </Form.Item>
           <Form.Item
             name="lastname"
             label="Last Name"
-            rules={[
-              { required: true, message: "Please enter last name" },
-            ]}
+            rules={[{ required: true, message: "Please enter last name" }]}
           >
             <Input placeholder="John Doe" />
           </Form.Item>
           <Form.Item
             name="mobile"
             label="Mobile"
-            rules={[
-              { required: true, message: "Please enter mobile" },
-            ]}
+            rules={[{ required: true, message: "Please enter mobile" }]}
           >
             <Input placeholder="9878878787" type="number" />
           </Form.Item>
           <Form.Item
             name="headline"
             label="Headline"
-            rules={[
-              { required: true, message: "Please enter headline" },
-            ]}
+            rules={[{ required: true, message: "Please enter headline" }]}
           >
             <Input placeholder="Software Engineer" />
           </Form.Item>
           <Form.Item
             name="website"
             label="Website"
-            rules={[
-              { required: true, message: "Please enter website" },
-            ]}
+            rules={[{ required: true, message: "Please enter website" }]}
           >
             <Input placeholder="johnportfolio.com" />
           </Form.Item>
@@ -233,9 +223,7 @@ const StudentForm: React.FC = () => {
           <Form.Item
             name="college"
             label="College"
-            rules={[
-              { required: true, message: "Please select college" },
-            ]}
+            rules={[{ required: true, message: "Please select college" }]}
           >
             <AutoComplete
               placeholder="NIT College"
@@ -256,9 +244,7 @@ const StudentForm: React.FC = () => {
           <Form.Item
             name="degree"
             label="Degree"
-            rules={[
-              { required: true, message: "Please select degree" },
-            ]}
+            rules={[{ required: true, message: "Please select degree" }]}
           >
             <AutoComplete
               placeholder="BE"
@@ -322,9 +308,7 @@ const StudentForm: React.FC = () => {
           <Form.Item
             name="course"
             label="Course"
-            rules={[
-              { required: true, message: "Please select course" },
-            ]}
+            rules={[{ required: true, message: "Please select course" }]}
           >
             <AutoComplete
               placeholder="M.Tech (AI/ML)"
@@ -354,9 +338,7 @@ const StudentForm: React.FC = () => {
           <Form.Item
             name="joinYear"
             label="Join Year"
-            rules={[
-              { required: true, message: "Please select join year" },
-            ]}
+            rules={[{ required: true, message: "Please select join year" }]}
           >
             <DatePicker
               picker="year"
@@ -498,7 +480,9 @@ const StudentForm: React.FC = () => {
         const response = await createstudent(finalData);
 
         if (response?.id) {
-          navigate("/dashboard");
+          navigate(
+            `/dashboard?token=${token}&username=${username}&email=${email}&id=${id}&studentid=${response?.id}`
+          );
         } else {
           notification.error({
             message: "Error",
