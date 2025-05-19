@@ -1,59 +1,24 @@
 import React, { useState } from 'react';
 import { Button, Form, Input, message, Typography } from 'antd';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
-
+import { GoogleOAuthProvider, GoogleLogin , type CredentialResponse } from '@react-oauth/google';
+import axiosInstance from "../config/axiosInstance"; 
+import { jwtDecode } from "jwt-decode";
 const { Link } = Typography;
 
 const LoginPage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
 
-  // Handle Registration
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleRegister = async (values: any) => {
-    setLoading(true);
+  const handleSuccess = async (credentialResponse:CredentialResponse) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', values);
-      message.success(response.data.message);
-      setIsLogin(true); // Switch to login after successful registration
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      message.error(error.response?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
+      
+        let response = await axiosInstance.post('users/auth/google',{ token : credentialResponse.credential })
+        console.log(response);
+    } catch (error) {
+      
     }
   };
 
-  // Handle Login
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleLogin = async (values: any) => {
-    setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', values);
-      message.success(response.data.message);
-      localStorage.setItem('token', response.data.token);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      message.error(error.response?.data?.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Toggle between login and registration
-  const toggleForm = () => setIsLogin(!isLogin);
-
-  // Google Login Handlers
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleGoogleLoginSuccess = (credentialResponse: any) => {
-    console.log('Google login success:', credentialResponse);
-    window.location.href = 'http://localhost:3900/users/google';
-    message.success('Logged in with Google!');
-  };
-
-  const handleGoogleLoginFailure = () => {
-    message.error('Google login failed!');
+  const handleError = () => {
+    console.log('Login Failed');
   };
 
   return (
@@ -66,11 +31,11 @@ const LoginPage: React.FC = () => {
           width: 400, padding: 20, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)', 
           backgroundColor: '#fff', borderRadius: 8 
         }}>
-          <h2 style={{ textAlign: 'center' }}>{isLogin ? 'Login' : 'Register'}</h2>
+          <h2 style={{ textAlign: 'center' }}>{'Login'}</h2>
           <Form
-            name={isLogin ? 'login' : 'register'}
+            name={'login'}
             initialValues={{ remember: true }}
-            onFinish={isLogin ? handleLogin : handleRegister}
+           // onFinish={isLogin ? handleLogin : handleRegister}
             layout="vertical"
           >
             <Form.Item
@@ -89,7 +54,7 @@ const LoginPage: React.FC = () => {
               <Input.Password />
             </Form.Item>
 
-            {!isLogin && (
+   
               <Form.Item
                 label="Confirm Password"
                 name="confirmPassword"
@@ -107,29 +72,29 @@ const LoginPage: React.FC = () => {
               >
                 <Input.Password />
               </Form.Item>
-            )}
+         
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" block loading={loading}>
-                {isLogin ? 'Log In' : 'Register'}
+              <Button type="primary" htmlType="submit" block >
+                  Login
               </Button>
             </Form.Item>
 
-            {isLogin && (
+          
               <div style={{ marginTop: 10 }}>
                 <GoogleLogin
-                  onSuccess={handleGoogleLoginSuccess}
-                  onError={handleGoogleLoginFailure}
+                  onSuccess={handleSuccess}
+                  onError={handleError}
                   text="signin_with"
                 />
               </div>
-            )}
+          
           </Form>
 
           <div style={{ textAlign: 'center', marginTop: 10 }}>
-            <Link onClick={toggleForm}>
+            {/* <Link onClick={toggleForm}>
               {isLogin ? 'New here? Register' : 'Already have an account? Login'}
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "env-cmd -e development vite",
+    "build": "tsc -b && env-cmd -e production build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -15,9 +15,11 @@
     "antd": "^5.25.1",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
+    "env-cmd": "^10.1.0",
     "i18next": "^25.1.2",
     "i18next-browser-languagedetector": "^8.1.0",
     "i18next-http-backend": "^3.0.2",
+    "jwt-decode": "^4.0.0",
     "material-react-toastify": "^10.0.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
