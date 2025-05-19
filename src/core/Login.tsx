@@ -9,11 +9,10 @@ const LoginPage: React.FC = () => {
 
   const handleSuccess = async (credentialResponse:CredentialResponse) => {
     try {
-      
         let response = await axiosInstance.post('users/auth/google',{ token : credentialResponse.credential })
         console.log(response);
     } catch (error) {
-      
+      console.log(error)
     }
   };
 

@@ -1,6 +1,5 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios';
-import {  toast } from 'material-react-toastify';
-import 'material-react-toastify/dist/ReactToastify.css';
+  import { toast } from 'react-toastify';
 
 // Create an instance with default settings
 const axiosInstance = axios.create({
@@ -31,15 +30,15 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.status === 400) {
-      console.log(((error?.response) as AxiosResponse)?.data  )
-
+    if (error.status === 400 || error.status === 401 ) {
+     
       const errors = ((error?.response) as AxiosResponse)?.data?.errors ?? "Server error contact admin!"
         
       // Display each error as a separate toast
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       errors.forEach((err:any) => {
-          toast.error(err);
+
+          toast.error(` ${err}`);
       });
 
    //   toast.error(((error?.response) as AxiosResponse)?.data?.errors ?? "Server error contact admin!");

@@ -1,12 +1,11 @@
-import "./App.css";
+// import "./App.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Index from "./core/Index.tsx";
 import Login from "./core/Login.tsx";
 import StudentForm from "./pages/student-form/index.tsx";
 import DashBoard from "./pages/dashboard/index.tsx";
-import { ToastContainer } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
-import 'react-toastify/dist/ReactToastify.css';
+import { Bounce, ToastContainer } from 'react-toastify';
 
 
 function App() {
@@ -14,7 +13,7 @@ function App() {
 
   const router = createBrowserRouter([
     {
-      path: "/",
+      path: "/", 
       element: <Index />,
       children: [
         {
@@ -35,8 +34,10 @@ function App() {
 
   return (
     <>
+      <ToastContainer position="top-right"
+                     />
+
       <RouterProvider router={router} />
-      <ToastContainer/>
     </>
   );
 }
