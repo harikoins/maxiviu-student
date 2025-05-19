@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   Button,
@@ -8,7 +8,6 @@ import {
   Typography,
   Space,
   Divider,
-  message,
   List,
   Tag,
   Modal,
@@ -24,6 +23,9 @@ import {
 } from "@ant-design/icons";
 import type { UploadProps } from "antd";
 import { createdocument } from "../../services/documentService";
+import { showSuccessToast, showErrorToast } from "../../utils/toaster";
+import { userDatas } from "../../stores/userStore";
+import config from "../../config/config";
 
 const { Title, Text } = Typography;
 
@@ -37,6 +39,7 @@ interface DocumentItem {
   name: string;
   file?: File;
   fileName?: string;
+  dbId?: number;
 }
 
 const DocumentDrawer: React.FC<DrawerType> = ({
@@ -68,6 +71,115 @@ const DocumentDrawer: React.FC<DrawerType> = ({
       setNewCertificate("");
     }
   };
+
+  // const fetchDocumentFile = async (
+  //   documentpath: string,
+  //   filename: string
+  // ): Promise<File> => {
+  //    console.log(documentpath,"documentpath")
+  //   const response = await fetch(documentpath);
+  //   console.log(response,"responsenew")
+  //   const blob = await response.blob();
+  //   return new File([blob], filename, { type: blob.type });
+  // };
+
+  const fetchDocumentFile = async (
+    documentpath: string,
+    filename: string
+  ): Promise<File> => {
+    try {
+      // Construct the complete URL
+      const completeUrl = documentpath.startsWith("http")
+        ? documentpath
+        : `${config.backendUrl}/${documentpath}`;
+
+      const response = await fetch(completeUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error fetching file: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      return new File([blob], filename, { type: blob.type });
+    } catch (error) {
+      console.error("Error fetching document file:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const loadDocuments = async () => {
+      if (userDatas?.value?.documents) {
+        try {
+          // Process resume
+          const userResume = userDatas.value.documents.find(
+            (doc) => doc.type === "Resume"
+          );
+          if (userResume) {
+            const resumeFile = await fetchDocumentFile(
+              userResume.documentpath,
+              userResume.filename
+            );
+            setResume({
+              name: userResume.name,
+              file: resumeFile,
+              fileName: userResume.filename,
+            });
+            setResumeName(userResume.name);
+          }
+
+          // Process marksheets
+          const userMarksheets = userDatas.value.documents.filter(
+            (doc) => doc.type === "Marksheet"
+          );
+          const marksheetItems = await Promise.all(
+            userMarksheets.map(async (marksheet) => {
+              const file = await fetchDocumentFile(
+                marksheet.documentpath,
+                marksheet.filename
+              );
+              return {
+                name: marksheet.name,
+                file,
+                fileName: marksheet.filename,
+              };
+            })
+          );
+          setMarksheets(marksheetItems);
+
+          // Process certificates
+          const userCertificates = userDatas.value.documents.filter(
+            (doc) => doc.type === "Certification"
+          );
+          const certificateItems = await Promise.all(
+            userCertificates.map(async (certificate) => {
+              const file = await fetchDocumentFile(
+                certificate.documentpath,
+                certificate.filename
+              );
+              return {
+                name: certificate.name,
+                file,
+                fileName: certificate.filename,
+              };
+            })
+          );
+          setCertificates(certificateItems);
+        } catch (error) {
+          console.error("Error loading documents", error);
+          showErrorToast("Failed to load documents");
+        }
+      }
+    };
+
+    loadDocuments();
+  }, [userDatas.value]);
 
   const handleUpload = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,7 +213,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
         });
       }
 
-      message.success(`${file.name} uploaded successfully`);
+      showSuccessToast(`${file.name} uploaded successfully`);
     }
   };
 
@@ -131,11 +243,17 @@ const DocumentDrawer: React.FC<DrawerType> = ({
     }
   };
 
-  const handlePreview = (file: File) => {
-    setPreviewFile(file);
-    setPreviewVisible(true);
+  const handlePreview = async (item: DocumentItem) => {
+    try {
+      if (item.file) {
+        setPreviewFile(item.file);
+        setPreviewVisible(true);
+      }
+    } catch (error) {
+      console.error("Error previewing file:", error);
+      showErrorToast("Failed to preview file");
+    }
   };
-
   const props: UploadProps = {
     beforeUpload: () => false,
     maxCount: 1,
@@ -149,7 +267,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
     const hasEmptyResume = !resume?.file;
 
     if (hasEmptyMarksheet || hasEmptyCertificate || hasEmptyResume) {
-      message.error("Please upload all required documents before saving");
+      showErrorToast("Please upload all required documents before saving");
       return;
     }
 
@@ -201,11 +319,11 @@ const DocumentDrawer: React.FC<DrawerType> = ({
 
     try {
       await createdocument(formData);
-      message.success("Documents uploaded successfully");
+      showSuccessToast("Documents uploaded successfully");
       handleClose();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      message.error("Error uploading documents");
+      showErrorToast("Error uploading documents");
     }
   };
 
@@ -249,6 +367,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
                 {...props}
                 onChange={(info) => handleUpload(info, 0, "resume")}
                 disabled={!resumeName.trim()}
+                accept="image/*,application/pdf"
               >
                 <Button icon={<UploadOutlined />} disabled={!resumeName.trim()}>
                   Upload
@@ -268,7 +387,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
                 <Button
                   type="text"
                   icon={<EyeOutlined />}
-                  onClick={() => handlePreview(resume.file!)}
+                  onClick={() => handlePreview(resume)}
                   size="small"
                 />
               </div>
@@ -312,7 +431,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
                       <Button
                         type="text"
                         icon={<EyeOutlined />}
-                        onClick={() => handlePreview(item.file!)}
+                        onClick={() => handlePreview(item)}
                         size="small"
                       />
                     </Space>
@@ -323,6 +442,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
                         handleUpload(info, index, "marksheet")
                       }
                       disabled={!item.name.trim()}
+                      accept="image/*,application/pdf"
                     >
                       <Button
                         icon={<UploadOutlined />}
@@ -375,7 +495,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
                       <Button
                         type="text"
                         icon={<EyeOutlined />}
-                        onClick={() => handlePreview(item.file!)}
+                        onClick={() => handlePreview(item)}
                         size="small"
                       />
                     </Space>
@@ -386,6 +506,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
                         handleUpload(info, index, "certificate")
                       }
                       disabled={!item.name.trim()}
+                      accept="image/*,application/pdf"
                     >
                       <Button
                         icon={<UploadOutlined />}

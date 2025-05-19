@@ -1,24 +1,32 @@
 import axios from "../config/axiosInstance";
 
-interface userDetails {
+interface userType {
   id: number;
   email: string;
   name: string;
 }
 
-interface Department {
+interface DepartmentType {
   id: number;
   name: string;
 }
 
-interface Degree {
+interface DegreeType {
   id: number;
   name: string;
 }
 
-interface Course {
+interface CourseType {
   id: number;
   name: string;
+}
+
+interface DocumentType {
+  id: number;
+  name: string;
+  documentpath: string;
+  type: string;
+  filename: string;
 }
 
 export interface studentType {
@@ -49,10 +57,11 @@ export interface studentType {
   country_id: number;
   course_id: number;
   status: number;
-  user: userDetails;
-  department: Department;
-  degree: Degree;
-  course: Course;
+  user: userType;
+  department: DepartmentType;
+  degree: DegreeType;
+  course: CourseType;
+  documents:DocumentType[];
 }
 interface PaginatedResponse<T> {
   items: T[];

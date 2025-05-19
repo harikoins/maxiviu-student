@@ -1,8 +1,9 @@
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 import React from "react";
-import { toast, ToastContainer } from "react-toastify";
+
 import { userDatas } from "../../stores/userStore";
 import { updatestudent } from "../../services/studentService";
+import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 
 // Define props interface for the component
 interface StoryCardsDrawerProps {
@@ -18,39 +19,12 @@ const StoryCardsDrawer: React.FC<StoryCardsDrawerProps> = ({
 }) => {
   const [form] = Form.useForm();
 
-  // Success Notification
-  const showSuccessToast = (message: string) => {
-    toast.success(message, {
-      position: "top-left",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "light",
-    });
-  };
-
-  // Error Toast
-  const showErrorToast = (message: string) => {
-    toast.error(message, {
-      position: "top-left",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "light",
-    });
-  };
-
   // Handle form submission
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onFinish = async (values: any) => {
     try {
       // Call the update function from studentService
       await updatestudent(Number(userDatas?.value?.id), values);
-      console.log(values, "values");
       showSuccessToast("Student Details Updated Successfully.");
 
       onClose(); // Close the drawer on success
@@ -139,7 +113,6 @@ const StoryCardsDrawer: React.FC<StoryCardsDrawerProps> = ({
           </Space>
         </Form>
       </Drawer>
-      <ToastContainer />
     </>
   );
 };
