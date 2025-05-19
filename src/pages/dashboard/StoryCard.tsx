@@ -7,24 +7,26 @@ import {
   BookOutlined,
 } from "@ant-design/icons";
 import styles from "../../components/styles/Dashboard.module.css";
-import { userDatas } from "../../stores/userStore";
 import StoryCardsDrawer from "./StoryCardsDrawer";
-
+import type { studentType } from "../../services/studentService";
 const { Title, Text } = Typography;
 
-interface StoryCardProps {
-  onUpdate: () => void;
+interface ChildProps {
+  student: studentType;
+  fetchUser:()=>void;
 }
 
-const StoryCards: React.FC<StoryCardProps> = ({onUpdate}) => {
+const StoryCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
   const [open, setOpen] = useState(false);
-
-  const showDrawer = () => {
-    setOpen(true);
-  };
+   const [type, setType] = useState<keyof studentType>("mystory");
 
   const onClose = () => {
     setOpen(false);
+  };
+
+  const handleUpdateType = (value: keyof studentType) => {
+    setType(value);
+    setOpen(true);
   };
 
   return (
@@ -50,13 +52,15 @@ const StoryCards: React.FC<StoryCardProps> = ({onUpdate}) => {
                   <EditOutlined
                     className={styles["edit-pen-icon"]}
                     style={{ fontSize: "1.25rem" }}
-                    onClick={showDrawer}
+                    onClick={() => {
+                      handleUpdateType("mystory");
+                    }}
                   />
                 </div>
               }
               description={
                 <Text className={styles["card-inside-text"]}>
-                  {userDatas?.value?.mystory ?? "Not added yet"}
+                  {student.mystory ?? "Not added yet"}
                 </Text>
               }
             />
@@ -78,13 +82,15 @@ const StoryCards: React.FC<StoryCardProps> = ({onUpdate}) => {
                   <EditOutlined
                     className={styles["edit-pen-icon"]}
                     style={{ fontSize: "1.25rem" }}
-                    onClick={showDrawer}
+                    onClick={() => {
+                      handleUpdateType("mygoal");
+                    }}
                   />
                 </div>
               }
               description={
                 <Text className={styles["card-inside-text"]}>
-                  {userDatas?.value?.mygoal ?? "Not added yet"}
+                  {student.mygoal ?? "Not added yet"}
                 </Text>
               }
             />
@@ -106,20 +112,28 @@ const StoryCards: React.FC<StoryCardProps> = ({onUpdate}) => {
                   <EditOutlined
                     className={styles["edit-pen-icon"]}
                     style={{ fontSize: "1.25rem" }}
-                    onClick={showDrawer}
+                    onClick={() => {
+                      handleUpdateType("myachievement");
+                    }}
                   />
                 </div>
               }
               description={
                 <Text className={styles["card-inside-text"]}>
-                  {userDatas?.value?.myachievement ?? "Not added yet"}
+                  {student.myachievement ?? "Not added yet"}
                 </Text>
               }
             />
           </Card>
         </Col>
       </Row>
-      <StoryCardsDrawer open={open} onClose={onClose} onUpdate={onUpdate}/>
+      <StoryCardsDrawer
+        open={open}
+        onClose={onClose}
+        student={student}
+        type={type}
+        fetchUser={fetchUser}
+      />
     </>
   );
 };
