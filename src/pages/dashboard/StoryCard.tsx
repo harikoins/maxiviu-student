@@ -13,12 +13,12 @@ const { Title, Text } = Typography;
 
 interface ChildProps {
   student: studentType;
-  fetchUser:()=>void;
+  fetchUser: () => void;
 }
 
-const StoryCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
+const StoryCards: React.FC<ChildProps> = ({ student, fetchUser }) => {
   const [open, setOpen] = useState(false);
-   const [type, setType] = useState<keyof studentType>("mystory");
+  const [type, setType] = useState<keyof studentType>("mystory");
 
   const onClose = () => {
     setOpen(false);
@@ -33,7 +33,7 @@ const StoryCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
     <>
       {/* My Story Card */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={24} lg={18} xl={8}>
+        <Col xs={24} sm={12} md={24} lg={18} xl={6}>
           <Card className="rounded-4 mt-3">
             <Card.Meta
               title={
@@ -98,7 +98,7 @@ const StoryCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
         </Col>
 
         {/* My Achievements Card */}
-        <Col xs={24} sm={12} md={24} lg={18} xl={8}>
+        <Col xs={24} sm={12} md={24} lg={18} xl={10}>
           <Card className="rounded-4 mt-3">
             <Card.Meta
               title={

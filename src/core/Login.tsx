@@ -18,7 +18,11 @@ const LoginPage: React.FC = () => {
         token: credentialResponse.credential,
       });
       setUser(response.data);
-      navigate("/dashboard");
+      if (response.data.isCreated) {
+        navigate("/dashboard");
+      } else {
+        navigate("/student-form");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -67,24 +71,6 @@ const LoginPage: React.FC = () => {
               name="password"
               rules={[
                 { required: true, message: "Please input your password!" },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-
-            <Form.Item
-              label="Confirm Password"
-              name="confirmPassword"
-              rules={[
-                { required: true, message: "Please confirm your password!" },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Passwords do not match!"));
-                  },
-                }),
               ]}
             >
               <Input.Password />

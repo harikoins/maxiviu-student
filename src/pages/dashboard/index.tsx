@@ -39,10 +39,10 @@ const ProfileDashboard: React.FC = () => {
           <Col md={16}>
             <Row gutter={[16, 16]}>
               <Col span={24}>
-                <StoryCards student={student} fetchUser={fetchUser}/>
+                <StoryCards student={student} fetchUser={fetchUser} />
               </Col>
               <Col span={24}>
-                <SkillsComponent />
+                <SkillsComponent student={student} fetchUser={fetchUser} />
               </Col>
               <Col span={24}>
                 <ExtracurricularActivities />

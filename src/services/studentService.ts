@@ -1,4 +1,7 @@
 import axios from "../config/axiosInstance";
+import type { softSkillType } from "./softskillsService";
+import type { technicalSkillType } from "./technicalskillService";
+import type { internshipType } from "./internshipService";
 
 interface userType {
   id: number;
@@ -62,6 +65,9 @@ export interface studentType {
   degree: DegreeType;
   course: CourseType;
   documents:DocumentType[];
+  internships:internshipType[];
+  softskills:softSkillType[];
+  technicalskills:technicalSkillType[];
 }
 interface PaginatedResponse<T> {
   items: T[];

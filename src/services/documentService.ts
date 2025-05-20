@@ -12,13 +12,13 @@ interface PaginatedResponse<T> {
   total: number;
 }
 
-export const getstudentPage = async (
+export const getdocumentPage = async (
   page = 1,
   limit = 10,
   search = ""
 ): Promise<PaginatedResponse<documentType>> => {
   const res = await axios.get(
-    `/students?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
+    `/documents?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
   );
   return {
     items: res.data.data,
