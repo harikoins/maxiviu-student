@@ -99,7 +99,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (values: any) => {
     try {
-      console.log(values, "values");
       const { internship = [], softSkills = [], techSkills = [] } = values;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const requests: Promise<any>[] = [];
