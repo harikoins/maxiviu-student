@@ -6,11 +6,8 @@ import {
   Input,
   AutoComplete,
   DatePicker,
-  Select,
-  message,
-  notification,
 } from "antd";
-import { setUser, type UserType } from "../../signals/userSignals";
+import { setUser, userSignal, type UserType } from "../../signals/userSignals";
 import type { courseType } from "../../services/courseService";
 import type { departmentType } from "../../services/departmentService";
 import type { degreeType } from "../../services/degreeService";
@@ -19,8 +16,7 @@ import { getdepartmentPage } from "../../services/departmentService";
 import { getdegreePage } from "../../services/degreeService";
 import { createstudent } from "../../services/studentService";
 import { useNavigate } from "react-router-dom";
-
-const { Option } = Select;
+import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 
 const { Step } = Steps;
 
@@ -83,18 +79,9 @@ const StudentForm: React.FC = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to fetch API data:", error);
-
-      notification.error({
-        message: "API Error",
-        description: error.message || "An unexpected error occurred.",
-        placement: "topRight",
-      });
+      showErrorToast(error.message || "An unexpected error occurred.");
     }
   }
-
-  useEffect(() => {
-    fetchApis();
-  }, []);
 
   const [current, setCurrent] = useState(0);
 
@@ -105,50 +92,10 @@ const StudentForm: React.FC = () => {
     null
   );
 
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-  const username = params.get("username");
-  const email = params.get("email");
-  const id = Number(params.get("id"));
-  const studentid = Number(params.get("studentid"));
-
   useEffect(() => {
-    if (token && username && email && id) {
-      const loginuser: UserType = {
-        username,
-        email,
-        accessToken: token,
-        id,
-        studentid,
-      };
-
-      // Set user data and token
-      setUser(loginuser);
-      setLoggedUserDetails(loginuser);
-      localStorage.setItem("maxiviu_student", JSON.stringify(loginuser));
-
-      message.success("Logged in with Google!");
-    }
+    fetchApis();
+    setLoggedUserDetails(userSignal.value);
   }, []);
-
-  const technicalSkills = [
-    "Communication",
-    "Teamwork",
-    "Problem Solving",
-    "Leadership",
-    "Time Management",
-    "Critical Thinking",
-  ];
-
-  const softSkills = [
-    "React",
-    "Node.js",
-    "Python",
-    "Java",
-    "SQL",
-    "Data Analysis",
-    "Machine Learning",
-  ];
 
   const steps = [
     {
@@ -220,7 +167,7 @@ const StudentForm: React.FC = () => {
           onFinish={(values) => handleFormSubmit(values, 1)}
         >
           {/* College Field */}
-          <Form.Item
+          {/* <Form.Item
             name="college"
             label="College"
             rules={[{ required: true, message: "Please select college" }]}
@@ -238,7 +185,7 @@ const StudentForm: React.FC = () => {
                   .includes(inputValue.toLowerCase()) || false
               }
             />
-          </Form.Item>
+          </Form.Item> */}
 
           {/* Degree Field */}
           <Form.Item
@@ -373,73 +320,32 @@ const StudentForm: React.FC = () => {
     },
 
     {
-      title: "Skills",
+      title: "Social Links",
       content: (
         <Form
           layout="vertical"
           onFinish={(values) => handleFormSubmit(values, 2)}
         >
           <Form.Item
-            name="softskills"
-            label="Soft Skills"
-            rules={[
-              {
-                required: true,
-                message: "Please select soft skills",
-              },
-            ]}
+            name="profile_linkedin"
+            label="Linkedin"
+            rules={[{ required: true, message: "Please enter linkedin link" }]}
           >
-            <Select
-              mode="multiple"
-              placeholder="Java, Python"
-              allowClear
-              showSearch
-              filterOption={(input, option) =>
-                option?.children
-                  ? option.children
-                      .toString()
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  : false
-              }
-            >
-              {softSkills.map((skill) => (
-                <Option key={skill} value={skill}>
-                  {skill}
-                </Option>
-              ))}
-            </Select>
+            <Input placeholder="(e.g., https://www.linkedin.com/in/yourname)" />
           </Form.Item>
           <Form.Item
-            name="technicalskills"
-            label="Technical Skills"
-            rules={[
-              {
-                required: true,
-                message: "Please select technical skills",
-              },
-            ]}
+            name="profile_github"
+            label="Github"
+            rules={[{ required: true, message: "Please enter github link" }]}
           >
-            <Select
-              mode="multiple"
-              placeholder="Communication,Leadership"
-              allowClear
-              showSearch
-              filterOption={(input, option) =>
-                option?.children
-                  ? option.children
-                      .toString()
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  : false
-              }
-            >
-              {technicalSkills.map((skill) => (
-                <Option key={skill} value={skill}>
-                  {skill}
-                </Option>
-              ))}
-            </Select>
+            <Input placeholder="(e.g., https://github.com/yourusername)" />
+          </Form.Item>
+          <Form.Item
+            name="profile_behance"
+            label="Behance"
+            rules={[{ required: true, message: "Please enter behance link" }]}
+          >
+            <Input placeholder="(e.g., https://www.behance.net/yourname)" />
           </Form.Item>
           <Button type="primary" htmlType="submit">
             Submit
@@ -475,28 +381,28 @@ const StudentForm: React.FC = () => {
         course_id: dropdown?.courses?.selectedValue,
         pphoneno: updatedFormData.mobile,
         sphoneno: updatedFormData.mobile,
+        profile_behance: updatedFormData.profile_behance,
+        profile_github: updatedFormData.profile_github,
+        profile_linkedin: updatedFormData.profile_linkedin,
       };
       try {
         const response = await createstudent(finalData);
 
         if (response?.id) {
-          navigate(
-            `/dashboard?token=${token}&username=${username}&email=${email}&id=${id}&studentid=${response?.id}`
-          );
+          if (userSignal.value) {
+            setUser({
+              ...userSignal.value,
+              studentid: response?.id,
+            });
+          }
+          navigate(`/dashboard`);
+          showSuccessToast("Submitted Successfully.")
         } else {
-          notification.error({
-            message: "Error",
-            description: "An unexpected error occurred. Please try again.",
-            placement: "topRight",
-          });
+          showErrorToast("An unexpected error occurred. Please try again.");
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        notification.error({
-          message: "Submission Failed",
-          description: error?.message || "An unexpected error occurred.",
-          placement: "topRight",
-        });
+        showErrorToast(error?.message || "An unexpected error occurred.");
       }
     }
   };

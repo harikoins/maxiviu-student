@@ -1,8 +1,16 @@
 import React from "react";
-import { Button, Card, Space, Typography } from "antd";
-import { PictureOutlined, TeamOutlined, BookOutlined, StarOutlined, SettingOutlined, TrophyOutlined } from "@ant-design/icons";
+import { Button, Card, Space, Typography, Grid } from "antd";
+import { 
+  PictureOutlined, 
+  TeamOutlined, 
+  BookOutlined, 
+  StarOutlined, 
+  SettingOutlined, 
+  TrophyOutlined 
+} from "@ant-design/icons";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 interface Activity {
   icon: React.ReactNode;
@@ -51,26 +59,106 @@ const activities: Activity[] = [
 ];
 
 const ExtracurricularActivities: React.FC = () => {
+  const screens = useBreakpoint();
+  
   return (
-    <Card style={{ backgroundColor: "#F8F9FA", borderRadius: "12px", padding: "16px" }}>
-      <Space style={{ justifyContent: "space-between", width: "100%" }}>
-        <Title level={4}>Extracurricular Activities</Title>
-        <Button type="primary" shape="round" style={{ backgroundColor: "#4DC4FF", borderColor: "#4DC4FF" }}>
+    <Card 
+      style={{ 
+        backgroundColor: "#F8F9FA", 
+        borderRadius: "12px", 
+        padding: screens.xs ? "12px" : "16px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
+      }}
+    >
+      <div style={{ 
+        display: "flex", 
+        flexDirection: screens.xs ? "column" : "row",
+        justifyContent: "space-between", 
+        alignItems: screens.xs ? "flex-start" : "center",
+        marginBottom: "16px",
+        gap: screens.xs ? "12px" : 0
+      }}>
+        <Title 
+          level={4} 
+          style={{ 
+            margin: 0,
+            fontSize: screens.xs ? "18px" : "20px"
+          }}
+        >
+          Extracurricular Activities
+        </Title>
+        <Button 
+          type="primary" 
+          shape="round" 
+          style={{ 
+            backgroundColor: "#4DC4FF", 
+            borderColor: "#4DC4FF",
+            fontSize: screens.xs ? "12px" : "14px",
+            height: screens.xs ? "32px" : "auto"
+          }}
+        >
           Add More
         </Button>
-      </Space>
-      {activities.map((activity, index) => (
-        <Card key={index} style={{ margin: "8px 0", borderRadius: "8px" }} bodyStyle={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Space size="large">
-            {activity.icon}
-            <span style={{ fontWeight: 600 }}>{activity.title}</span>
-          </Space>
-          <span style={{ flexGrow: 1, margin: "0 16px", color: "#7C7D7E" }}>{activity.description}</span>
-          {activity.gallery && (
-            <Button type="link" icon={<PictureOutlined style={{ color: "#4DC4FF" }} />}>Gallery</Button>
-          )}
-        </Card>
-      ))}
+      </div>
+      
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {activities.map((activity, index) => (
+          <Card 
+            key={index} 
+            style={{ 
+              margin: 0,
+              borderRadius: "8px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
+            }} 
+            bodyStyle={{ 
+              padding: screens.xs ? "12px" : "16px",
+              display: "flex", 
+              flexDirection: screens.xs ? "column" : "row",
+              alignItems: screens.xs ? "flex-start" : "center",
+              gap: screens.xs ? "8px" : "16px"
+            }}
+          >
+            <Space 
+              size="middle" 
+              style={{ 
+                minWidth: screens.xs ? "100%" : "160px",
+                justifyContent: screens.xs ? "space-between" : "flex-start"
+              }}
+            >
+              {activity.icon}
+              <Text strong style={{ fontSize: screens.xs ? "14px" : "16px" }}>
+                {activity.title}
+              </Text>
+            </Space>
+            
+            <Text 
+              style={{ 
+                color: "#7C7D7E",
+                flexGrow: 1,
+                fontSize: screens.xs ? "13px" : "14px",
+                margin: screens.xs ? "0 0 8px 0" : "0 16px"
+              }}
+            >
+              {activity.description}
+            </Text>
+            
+            {activity.gallery && (
+              <Button 
+                type="link" 
+                icon={<PictureOutlined style={{ color: "#4DC4FF" }} />}
+                style={{
+                  padding: 0,
+                  height: "auto",
+                  whiteSpace: "nowrap",
+                  fontSize: screens.xs ? "13px" : "14px"
+                }}
+              >
+                {screens.xs ? "View" : "Gallery"}
+              </Button>
+            )}
+          </Card>
+        ))}
+      </div>
     </Card>
   );
 };
