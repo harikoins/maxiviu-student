@@ -29,7 +29,7 @@ const ProfileDashboard: React.FC = () => {
       <Content>
         <Row gutter={[16, 16]}>
           <Col md={12}>
-            <UserCard />
+            <UserCard student={student} fetchUser={fetchUser}/>
           </Col>
           <Col md={12}>
             <VideoCard />

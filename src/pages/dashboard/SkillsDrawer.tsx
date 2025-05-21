@@ -17,8 +17,7 @@ import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { studentType } from "../../services/studentService";
 import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 import {
-  createBulkInternship,
-  type internshipType,
+  createBulkInternship
 } from "../../services/internshipService";
 import {
   createBulkSoftSkill,
@@ -54,7 +53,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
 
   const isMobile = !screens.lg;
 
-  // Add this function inside your SkillsDrawer component, before the return statement
   const getInitialValues = () => {
     return {
       internship:
@@ -64,6 +62,15 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
           organization: internship.organization,
           duration: internship.duration ? Number(internship.duration) : null,
           status: internship.status,
+          certificateFile: internship.certificatePath
+            ? {
+                uid: `-${internship.id}`,
+                name: internship.filename,
+                status: "done",
+                url: `${apiUrl}/${internship.certificatePath}`,
+                certificatePath: internship.certificatePath,
+              }
+            : null,
         })) || [],
 
       softSkills:
@@ -103,7 +110,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                 name: certification.filename,
                 status: "done",
                 url: `${apiUrl}/${certification.certificatePath}`,
-                certificatePath: certification.certificatePath, // Keep original path
+                certificatePath: certification.certificatePath,
               }
             : null,
         })) || [],
@@ -119,7 +126,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (values: any) => {
-    console.log(values, "values");
     try {
       const {
         internship = [],
@@ -130,28 +136,53 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const requests: Promise<any>[] = [];
 
-      // 1. Handle Internships
+      // Handle Internships with file upload
+      const internshipFormData = new FormData();
+      let internshipFileIndex = 0;
 
-      const internshipData = internship.map((item: internshipType) => ({
-        role: item.role,
-        type: item.type,
-        organization: item.organization || null,
-        duration: item.duration || null,
-        status: item.status,
-        student_id: student.id,
-      }));
-      requests.push(
-        createBulkInternship({
-          internshipDatas: internshipData,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const internshipDatas = internship.map((intern: any) => {
+        let certificateFilePath = null;
+        let certificateFileFlag = null;
+        let fileIndex = null;
+
+        if (intern.certificateFile?.originFileObj) {
+          internshipFormData.append(
+            "files",
+            intern.certificateFile.originFileObj
+          );
+          certificateFilePath = "";
+          certificateFileFlag = "";
+          fileIndex = internshipFileIndex++;
+        } else if (intern.certificateFile?.certificatePath) {
+          certificateFilePath = intern.certificateFile.certificatePath;
+          certificateFileFlag = intern.certificateFile.certificatePath;
+        }
+
+        return {
+          role: intern.role,
+          type: intern.type,
+          organization: intern.organization || null,
+          duration: intern.duration || null,
+          status: intern.status,
           student_id: student.id,
-        })
+          certificateFile: certificateFileFlag,
+          certificateFilePath,
+          fileIndex,
+        };
+      });
+
+      internshipFormData.append(
+        "internshipDatas",
+        JSON.stringify(internshipDatas)
       );
+      internshipFormData.append("student_id", student.id.toString());
+      requests.push(createBulkInternship(internshipFormData));
 
-      // 2. Handle Soft Skills
-
+      // Handle Soft Skills
       const softSkillsData = softSkills.map((item: softSkillType) => ({
         skill: item.skill,
-        trainingattended: item.trainingattended || null, // Match backend field
+        trainingattended: item.trainingattended || null,
         evaluationstatus: item.evaluationstatus,
         mockinterview: item.mockinterview || 0,
         bestscore: item.bestscore || null,
@@ -164,8 +195,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
         })
       );
 
-      // 3. Handle Technical Skills
-
+      // Handle Technical Skills
       const techSkillsData = techSkills.map((item: technicalSkillType) => ({
         skill: item.skill,
         expertiselevel: item.expertiselevel,
@@ -182,13 +212,9 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
         })
       );
 
-      // 4. Handle Certifications (with file upload)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // 4. Handle Certifications (with bulk file upload)
-      const formData = new FormData();
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let fileUploadIndex = 0;
+      // Handle Certifications
+      const certificationFormData = new FormData();
+      let certificationFileIndex = 0;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const certificationDatas = certifications.map((cert: any) => {
@@ -197,13 +223,14 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
         let fileIndex = null;
 
         if (cert.certificateFile?.originFileObj) {
-          // New file, add to FormData
-          formData.append("files", cert.certificateFile.originFileObj);
+          certificationFormData.append(
+            "files",
+            cert.certificateFile.originFileObj
+          );
           certificateFilePath = "";
           certificateFileFlag = "";
-          fileIndex = fileUploadIndex++; // Track current file's index in req.files
+          fileIndex = certificationFileIndex++;
         } else if (cert.certificateFile?.certificatePath) {
-          // Existing file
           certificateFilePath = cert.certificateFile.certificatePath;
           certificateFileFlag = cert.certificateFile.certificatePath;
         }
@@ -216,20 +243,19 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
           student_id: student.id,
           certificateFile: certificateFileFlag,
           certificateFilePath,
-          fileIndex, // <- Important
+          fileIndex,
         };
       });
 
-      // Append array as JSON
-      formData.append("certificationDatas", JSON.stringify(certificationDatas));
-      formData.append("student_id", student.id.toString());
+      certificationFormData.append(
+        "certificationDatas",
+        JSON.stringify(certificationDatas)
+      );
+      certificationFormData.append("student_id", student.id.toString());
+      requests.push(createBulkCertificate(certificationFormData));
 
-      requests.push(createBulkCertificate(formData));
-
-      // ⏱️ Execute all requests concurrently
+      // Execute all requests
       const responses = await Promise.all(requests);
-
-      // Optionally check if any failed
       const hasError = responses.some((res) => res?.success === false);
       if (hasError) throw new Error("Some data could not be saved");
 
@@ -318,6 +344,9 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
           <Col sm={6} md={4} lg={3}>
             <div style={{ fontWeight: 500 }}>Status</div>
           </Col>
+          <Col sm={12} md={6} lg={4}>
+            <div style={{ fontWeight: 500 }}>Certificate</div>
+          </Col>
         </>
       )}
       <Col xs={24} sm={8} md={6} lg={1}>
@@ -328,36 +357,25 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
 
   const renderCertificationsHeaders = () => (
     <Row gutter={[16, 8]} style={{ marginBottom: 8, padding: "0 8px" }}>
-      {/* Name */}
       <Col xs={24} sm={12} md={8} lg={6}>
         <div style={{ fontWeight: 500 }}>Name of the Certification</div>
       </Col>
-
       {!isMobile && (
         <>
-          {/* Mode */}
           <Col sm={6} md={4} lg={3}>
             <div style={{ fontWeight: 500 }}>Mode</div>
           </Col>
-
-          {/* Certified By */}
           <Col sm={12} md={8} lg={4}>
             <div style={{ fontWeight: 500 }}>Certified By</div>
           </Col>
-
-          {/* Description */}
           <Col sm={24} md={12} lg={6}>
             <div style={{ fontWeight: 500 }}>Description</div>
           </Col>
-
-          {/* Certificate Upload */}
           <Col sm={12} md={6} lg={4}>
             <div style={{ fontWeight: 500 }}>Certificate</div>
           </Col>
         </>
       )}
-
-      {/* Action (Delete) - Aligned to match the delete button position */}
       <Col
         xs={24}
         sm={8}
@@ -370,7 +388,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
     </Row>
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderTechSkillFields = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     { key, name, ...restField }: any,
@@ -535,7 +552,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
     </div>
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderSoftSkillFields = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     { key, name, ...restField }: any,
@@ -660,7 +676,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
     </div>
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderInternshipFields = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     { key, name, ...restField }: any,
@@ -725,6 +740,51 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                 </Select>
               </Form.Item>
             </Col>
+            <Col sm={12} md={6} lg={4}>
+              <Form.Item {...restField} name={[name, "certificateFile"]}>
+                <Upload
+                  accept=".pdf,.jpg,.png,.jpeg"
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  listType="picture-card"
+                  fileList={
+                    form.getFieldValue(["internship", name, "certificateFile"])
+                      ? [
+                          form.getFieldValue([
+                            "internship",
+                            name,
+                            "certificateFile",
+                          ]),
+                        ]
+                      : []
+                  }
+                  onChange={({ fileList }) => {
+                    const newFileList = fileList.slice(-1);
+                    form.setFieldsValue({
+                      internship: [
+                        ...form.getFieldValue("internship").slice(0, name),
+                        {
+                          ...form.getFieldValue(["internship", name]),
+                          certificateFile: newFileList[0] || null,
+                        },
+                        ...form.getFieldValue("internship").slice(name + 1),
+                      ],
+                    });
+                  }}
+                >
+                  {form.getFieldValue([
+                    "internship",
+                    name,
+                    "certificateFile",
+                  ]) ? null : (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  )}
+                </Upload>
+              </Form.Item>
+            </Col>
           </>
         ) : (
           <>
@@ -772,6 +832,55 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                 </Select>
               </Form.Item>
             </Col>
+            <Col xs={24}>
+              <Form.Item
+                {...restField}
+                name={[name, "certificateFile"]}
+                label="Certificate"
+              >
+                <Upload
+                  accept=".pdf,.jpg,.png,.jpeg"
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  listType="picture-card"
+                  fileList={
+                    form.getFieldValue(["internship", name, "certificateFile"])
+                      ? [
+                          form.getFieldValue([
+                            "internship",
+                            name,
+                            "certificateFile",
+                          ]),
+                        ]
+                      : []
+                  }
+                  onChange={({ fileList }) => {
+                    const newFileList = fileList.slice(-1);
+                    form.setFieldsValue({
+                      internship: [
+                        ...form.getFieldValue("internship").slice(0, name),
+                        {
+                          ...form.getFieldValue(["internship", name]),
+                          certificateFile: newFileList[0] || null,
+                        },
+                        ...form.getFieldValue("internship").slice(name + 1),
+                      ],
+                    });
+                  }}
+                >
+                  {form.getFieldValue([
+                    "internship",
+                    name,
+                    "certificateFile",
+                  ]) ? null : (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  )}
+                </Upload>
+              </Form.Item>
+            </Col>
           </>
         )}
         <Col
@@ -810,7 +919,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
         <div style={{ fontWeight: 600, marginBottom: 8 }}>Certification</div>
       )}
       <Row gutter={[16, 8]}>
-        {/* Certification Name */}
         <Col xs={24} sm={12} md={8} lg={6}>
           <Form.Item
             {...restField}
@@ -824,7 +932,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
 
         {!isMobile ? (
           <>
-            {/* Mode */}
             <Col sm={6} md={4} lg={3}>
               <Form.Item
                 {...restField}
@@ -839,7 +946,6 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
               </Form.Item>
             </Col>
 
-            {/* Certified By */}
             <Col sm={12} md={8} lg={4}>
               <Form.Item
                 {...restField}
@@ -850,14 +956,12 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
               </Form.Item>
             </Col>
 
-            {/* Description */}
             <Col sm={24} md={12} lg={6}>
               <Form.Item {...restField} name={[name, "description"]}>
                 <Input.TextArea placeholder="Description (optional)" />
               </Form.Item>
             </Col>
 
-            {/* Certificate Upload */}
             <Col sm={12} md={6} lg={4}>
               <Form.Item {...restField} name={[name, "certificateFile"]}>
                 <Upload
@@ -881,7 +985,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                       : []
                   }
                   onChange={({ fileList }) => {
-                    const newFileList = fileList.slice(-1); // Only keep the last file
+                    const newFileList = fileList.slice(-1);
                     form.setFieldsValue({
                       certifications: [
                         ...form.getFieldValue("certifications").slice(0, name),
@@ -898,20 +1002,15 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                     "certifications",
                     name,
                     "certificateFile",
-                  ]) ? null : (
-                    <div>
-                      <PlusOutlined />
-                      <div style={{ marginTop: 8 }}>Upload</div>
-                    </div>
-                  )}
+                  ])
+                    ? null
+                    : uploadButton}
                 </Upload>
-                
               </Form.Item>
             </Col>
           </>
         ) : (
           <>
-            {/* Mobile View */}
             <Col xs={24}>
               <Form.Item
                 {...restField}
@@ -992,20 +1091,15 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                     "certifications",
                     name,
                     "certificateFile",
-                  ]) ? null : (
-                    <div>
-                      <PlusOutlined />
-                      <div style={{ marginTop: 8 }}>Upload</div>
-                    </div>
-                  )}
+                  ])
+                    ? null
+                    : uploadButton}
                 </Upload>
-               
               </Form.Item>
             </Col>
           </>
         )}
 
-        {/* Delete Button */}
         <Col
           xs={24}
           sm={8}
@@ -1021,6 +1115,13 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
           />
         </Col>
       </Row>
+    </div>
+  );
+
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
     </div>
   );
 
@@ -1051,7 +1152,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   gap: "8px",
                 }}
               >
-                <div style={{ fontWeight: 600 }}>Technical Skills</div>
+                <div style={{ fontWeight: 600,fontSize:'1.3rem' }}>Technical Skills</div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -1079,7 +1180,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   marginTop: 24,
                 }}
               >
-                <div style={{ fontWeight: 600 }}>Soft Skills</div>
+                <div style={{ fontWeight: 600 ,fontSize:'1.3rem'}}>Soft Skills</div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -1107,7 +1208,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   marginTop: 24,
                 }}
               >
-                <div style={{ fontWeight: 600 }}>Internships</div>
+                <div style={{ fontWeight: 600 ,fontSize:'1.3rem'}}>Internships</div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -1135,7 +1236,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   marginTop: 24,
                 }}
               >
-                <div style={{ fontWeight: 600 }}>Certifications</div>
+                <div style={{ fontWeight: 600,fontSize:'1.3rem' }}>Certifications</div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}

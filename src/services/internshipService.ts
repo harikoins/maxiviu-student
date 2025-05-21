@@ -8,6 +8,9 @@ export interface internshipType {
   organization: string;
   duration: string;
   status: string;
+  filename: string;
+  certificatePath: string;
+  certificateFile: string;
 }
 interface PaginatedResponse<T> {
   items: T[];
@@ -41,12 +44,22 @@ export const createInternship = async (
   return res.data;
 };
 
+// export const createBulkInternship = async (data: {
+//   internshipDatas: Omit<internshipType, "id">[];
+//   student_id: number;
+// }): Promise<{ success: boolean; data: internshipType[] }> => {
+//   const res = await axios.post("/intenships/bulk-create", data);
+//   return res.data;
+// };
 
-export const createBulkInternship = async (data: {
-  internshipDatas: Omit<internshipType, "id">[];
-  student_id: number;
-}): Promise<{ success: boolean; data: internshipType[] }> => {
-  const res = await axios.post("/intenships/bulk-create", data);
+export const createBulkInternship = async (
+  formData: FormData
+): Promise<{ success: boolean; data: internshipType[] }> => {
+  const res = await axios.post("/intenships/bulk-create", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data;
 };
 
