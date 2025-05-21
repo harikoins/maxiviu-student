@@ -1,4 +1,4 @@
-import React,{useEffect} from "react";
+import React, { useEffect } from "react";
 import {
   Drawer,
   Form,
@@ -11,6 +11,7 @@ import {
   Row,
   Col,
   Grid,
+  Upload,
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { studentType } from "../../services/studentService";
@@ -27,6 +28,9 @@ import {
   createBulkTechnicalSkill,
   type technicalSkillType,
 } from "../../services/technicalskillService";
+import { createBulkCertificate } from "../../services/certificationService";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
@@ -86,6 +90,23 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
             : 0,
           bestscore: techskill.bestscore,
         })) || [],
+
+      certifications:
+        student.certificates?.map((certification) => ({
+          name: certification.name,
+          mode: certification.mode,
+          certifiedBy: certification.certifiedBy,
+          description: certification.description,
+          certificateFile: certification.certificatePath
+            ? {
+                uid: `-${certification.id}`,
+                name: certification.filename,
+                status: "done",
+                url: `${apiUrl}/${certification.certificatePath}`,
+                certificatePath: certification.certificatePath, // Keep original path
+              }
+            : null,
+        })) || [],
     };
   };
 
@@ -98,54 +119,112 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (values: any) => {
+    console.log(values, "values");
     try {
-      const { internship = [], softSkills = [], techSkills = [] } = values;
+      const {
+        internship = [],
+        softSkills = [],
+        techSkills = [],
+        certifications = [],
+      } = values;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const requests: Promise<any>[] = [];
 
       // 1. Handle Internships
-      if (internship.length > 0) {
-        const internshipData = internship.map((item: internshipType) => ({
-          role: item.role,
-          type: item.type,
-          organization: item.organization || null,
-          duration: item.duration || null,
-          status: item.status,
+
+      const internshipData = internship.map((item: internshipType) => ({
+        role: item.role,
+        type: item.type,
+        organization: item.organization || null,
+        duration: item.duration || null,
+        status: item.status,
+        student_id: student.id,
+      }));
+      requests.push(
+        createBulkInternship({
+          internshipDatas: internshipData,
           student_id: student.id,
-        }));
-        requests.push(
-          createBulkInternship({ internshipDatas: internshipData })
-        );
-      }
+        })
+      );
 
       // 2. Handle Soft Skills
-      if (softSkills.length > 0) {
-        const softSkillsData = softSkills.map((item: softSkillType) => ({
-          skill: item.skill,
-          trainingattended: item.trainingattended || null, // Match backend field
-          evaluationstatus: item.evaluationstatus,
-          mockinterview: item.mockinterview || 0,
-          bestscore: item.bestscore || null,
+
+      const softSkillsData = softSkills.map((item: softSkillType) => ({
+        skill: item.skill,
+        trainingattended: item.trainingattended || null, // Match backend field
+        evaluationstatus: item.evaluationstatus,
+        mockinterview: item.mockinterview || 0,
+        bestscore: item.bestscore || null,
+        student_id: student.id,
+      }));
+      requests.push(
+        createBulkSoftSkill({
+          softSkillDatas: softSkillsData,
           student_id: student.id,
-        }));
-        requests.push(createBulkSoftSkill({ softSkillDatas: softSkillsData }));
-      }
+        })
+      );
 
       // 3. Handle Technical Skills
-      if (techSkills.length > 0) {
-        const techSkillsData = techSkills.map((item: technicalSkillType) => ({
-          skill: item.skill,
-          expertiselevel: item.expertiselevel,
-          evaluationstatus: item.evaluationstatus,
-          noofprojects: item.noofprojects || 0,
-          mockinterview: item.mockinterview || 0,
-          bestscore: item.bestscore || null,
+
+      const techSkillsData = techSkills.map((item: technicalSkillType) => ({
+        skill: item.skill,
+        expertiselevel: item.expertiselevel,
+        evaluationstatus: item.evaluationstatus,
+        noofprojects: item.noofprojects || 0,
+        mockinterview: item.mockinterview || 0,
+        bestscore: item.bestscore || null,
+        student_id: student.id,
+      }));
+      requests.push(
+        createBulkTechnicalSkill({
+          technicalSkillDatas: techSkillsData,
           student_id: student.id,
-        }));
-        requests.push(
-          createBulkTechnicalSkill({ technicalSkillDatas: techSkillsData })
-        );
-      }
+        })
+      );
+
+      // 4. Handle Certifications (with file upload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // 4. Handle Certifications (with bulk file upload)
+      const formData = new FormData();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let fileUploadIndex = 0;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const certificationDatas = certifications.map((cert: any) => {
+        let certificateFilePath = null;
+        let certificateFileFlag = null;
+        let fileIndex = null;
+
+        if (cert.certificateFile?.originFileObj) {
+          // New file, add to FormData
+          formData.append("files", cert.certificateFile.originFileObj);
+          certificateFilePath = "";
+          certificateFileFlag = "";
+          fileIndex = fileUploadIndex++; // Track current file's index in req.files
+        } else if (cert.certificateFile?.certificatePath) {
+          // Existing file
+          certificateFilePath = cert.certificateFile.certificatePath;
+          certificateFileFlag = cert.certificateFile.certificatePath;
+        }
+
+        return {
+          name: cert.name,
+          mode: cert.mode,
+          certifiedBy: cert.certifiedBy,
+          description: cert.description || "",
+          student_id: student.id,
+          certificateFile: certificateFileFlag,
+          certificateFilePath,
+          fileIndex, // <- Important
+        };
+      });
+
+      // Append array as JSON
+      formData.append("certificationDatas", JSON.stringify(certificationDatas));
+      formData.append("student_id", student.id.toString());
+
+      requests.push(createBulkCertificate(formData));
 
       // ⏱️ Execute all requests concurrently
       const responses = await Promise.all(requests);
@@ -242,6 +321,50 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
         </>
       )}
       <Col xs={24} sm={8} md={6} lg={1}>
+        <div style={{ fontWeight: 500 }}>Action</div>
+      </Col>
+    </Row>
+  );
+
+  const renderCertificationsHeaders = () => (
+    <Row gutter={[16, 8]} style={{ marginBottom: 8, padding: "0 8px" }}>
+      {/* Name */}
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <div style={{ fontWeight: 500 }}>Name of the Certification</div>
+      </Col>
+
+      {!isMobile && (
+        <>
+          {/* Mode */}
+          <Col sm={6} md={4} lg={3}>
+            <div style={{ fontWeight: 500 }}>Mode</div>
+          </Col>
+
+          {/* Certified By */}
+          <Col sm={12} md={8} lg={4}>
+            <div style={{ fontWeight: 500 }}>Certified By</div>
+          </Col>
+
+          {/* Description */}
+          <Col sm={24} md={12} lg={6}>
+            <div style={{ fontWeight: 500 }}>Description</div>
+          </Col>
+
+          {/* Certificate Upload */}
+          <Col sm={12} md={6} lg={4}>
+            <div style={{ fontWeight: 500 }}>Certificate</div>
+          </Col>
+        </>
+      )}
+
+      {/* Action (Delete) - Aligned to match the delete button position */}
+      <Col
+        xs={24}
+        sm={8}
+        md={6}
+        lg={1}
+        style={{ display: "flex", justifyContent: "flex-end" }}
+      >
         <div style={{ fontWeight: 500 }}>Action</div>
       </Col>
     </Row>
@@ -669,6 +792,238 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
     </div>
   );
 
+  const renderCertificationFields = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { key, name, ...restField }: any,
+    remove: (index: number) => void
+  ) => (
+    <div
+      key={key}
+      style={{
+        marginBottom: 8,
+        padding: 8,
+        border: "1px solid #f0f0f0",
+        borderRadius: 8,
+      }}
+    >
+      {isMobile && (
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>Certification</div>
+      )}
+      <Row gutter={[16, 8]}>
+        {/* Certification Name */}
+        <Col xs={24} sm={12} md={8} lg={6}>
+          <Form.Item
+            {...restField}
+            name={[name, "name"]}
+            label={isMobile ? "Certification Name" : undefined}
+            rules={[{ required: true, message: "Required" }]}
+          >
+            <Input placeholder="e.g., AWS Certified Developer" />
+          </Form.Item>
+        </Col>
+
+        {!isMobile ? (
+          <>
+            {/* Mode */}
+            <Col sm={6} md={4} lg={3}>
+              <Form.Item
+                {...restField}
+                name={[name, "mode"]}
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Select placeholder="Mode">
+                  <Option value="Online">Online</Option>
+                  <Option value="Offline">Offline</Option>
+                  <Option value="Hybrid">Hybrid</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+
+            {/* Certified By */}
+            <Col sm={12} md={8} lg={4}>
+              <Form.Item
+                {...restField}
+                name={[name, "certifiedBy"]}
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Input placeholder="Certified by (e.g., AWS, Microsoft)" />
+              </Form.Item>
+            </Col>
+
+            {/* Description */}
+            <Col sm={24} md={12} lg={6}>
+              <Form.Item {...restField} name={[name, "description"]}>
+                <Input.TextArea placeholder="Description (optional)" />
+              </Form.Item>
+            </Col>
+
+            {/* Certificate Upload */}
+            <Col sm={12} md={6} lg={4}>
+              <Form.Item {...restField} name={[name, "certificateFile"]}>
+                <Upload
+                  accept=".pdf,.jpg,.png,.jpeg"
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  listType="picture-card"
+                  fileList={
+                    form.getFieldValue([
+                      "certifications",
+                      name,
+                      "certificateFile",
+                    ])
+                      ? [
+                          form.getFieldValue([
+                            "certifications",
+                            name,
+                            "certificateFile",
+                          ]),
+                        ]
+                      : []
+                  }
+                  onChange={({ fileList }) => {
+                    const newFileList = fileList.slice(-1); // Only keep the last file
+                    form.setFieldsValue({
+                      certifications: [
+                        ...form.getFieldValue("certifications").slice(0, name),
+                        {
+                          ...form.getFieldValue(["certifications", name]),
+                          certificateFile: newFileList[0] || null,
+                        },
+                        ...form.getFieldValue("certifications").slice(name + 1),
+                      ],
+                    });
+                  }}
+                >
+                  {form.getFieldValue([
+                    "certifications",
+                    name,
+                    "certificateFile",
+                  ]) ? null : (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  )}
+                </Upload>
+                
+              </Form.Item>
+            </Col>
+          </>
+        ) : (
+          <>
+            {/* Mobile View */}
+            <Col xs={24}>
+              <Form.Item
+                {...restField}
+                name={[name, "mode"]}
+                label="Mode"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Select placeholder="Mode">
+                  <Option value="Online">Online</Option>
+                  <Option value="Offline">Offline</Option>
+                  <Option value="Hybrid">Hybrid</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+
+            <Col xs={24}>
+              <Form.Item
+                {...restField}
+                name={[name, "certifiedBy"]}
+                label="Certified By"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Input placeholder="Certified by (e.g., AWS, Microsoft)" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24}>
+              <Form.Item
+                {...restField}
+                name={[name, "description"]}
+                label="Description"
+              >
+                <Input.TextArea placeholder="Description (optional)" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24}>
+              <Form.Item
+                {...restField}
+                name={[name, "certificateFile"]}
+                label="Certificate"
+              >
+                <Upload
+                  accept=".pdf,.jpg,.png,.jpeg"
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  listType="picture-card"
+                  fileList={
+                    form.getFieldValue([
+                      "certifications",
+                      name,
+                      "certificateFile",
+                    ])
+                      ? [
+                          form.getFieldValue([
+                            "certifications",
+                            name,
+                            "certificateFile",
+                          ]),
+                        ]
+                      : []
+                  }
+                  onChange={({ fileList }) => {
+                    const newFileList = fileList.slice(-1);
+                    form.setFieldsValue({
+                      certifications: [
+                        ...form.getFieldValue("certifications").slice(0, name),
+                        {
+                          ...form.getFieldValue(["certifications", name]),
+                          certificateFile: newFileList[0] || null,
+                        },
+                        ...form.getFieldValue("certifications").slice(name + 1),
+                      ],
+                    });
+                  }}
+                >
+                  {form.getFieldValue([
+                    "certifications",
+                    name,
+                    "certificateFile",
+                  ]) ? null : (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  )}
+                </Upload>
+               
+              </Form.Item>
+            </Col>
+          </>
+        )}
+
+        {/* Delete Button */}
+        <Col
+          xs={24}
+          sm={8}
+          md={6}
+          lg={1}
+          style={{ display: "flex", justifyContent: "flex-end" }}
+        >
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => remove(name)}
+          />
+        </Col>
+      </Row>
+    </div>
+  );
+
   return (
     <Drawer
       title="Skills"
@@ -762,6 +1117,34 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
               <Divider style={{ marginTop: 0 }} />
               {fields.length > 0 && !isMobile && renderInternshipHeaders()}
               {fields.map((field) => renderInternshipFields(field, remove))}
+            </>
+          )}
+        </Form.List>
+
+        {/* CERTIFICATIONS */}
+        <Form.List name="certifications">
+          {(fields, { add, remove }) => (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  marginTop: 24,
+                }}
+              >
+                <div style={{ fontWeight: 600 }}>Certifications</div>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => add()}
+                ></Button>
+              </div>
+              <Divider style={{ marginTop: 0 }} />
+              {fields.length > 0 && !isMobile && renderCertificationsHeaders()}
+              {fields.map((field) => renderCertificationFields(field, remove))}
             </>
           )}
         </Form.List>

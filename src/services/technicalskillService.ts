@@ -44,6 +44,7 @@ export const createTechnicalSkill = async (
 
 export const createBulkTechnicalSkill = async (data: {
   technicalSkillDatas: Omit<technicalSkillType, "id">[];
+  student_id: number;
 }): Promise<{ success: boolean; data: technicalSkillType[] }> => {
   const res = await axios.post("/technicalskill/bulk-create", data);
   return res.data;

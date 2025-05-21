@@ -44,6 +44,7 @@ export const createInternship = async (
 
 export const createBulkInternship = async (data: {
   internshipDatas: Omit<internshipType, "id">[];
+  student_id: number;
 }): Promise<{ success: boolean; data: internshipType[] }> => {
   const res = await axios.post("/intenships/bulk-create", data);
   return res.data;

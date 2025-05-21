@@ -43,6 +43,7 @@ export const createSoftSkill = async (
 
 export const createBulkSoftSkill = async (data: {
   softSkillDatas: Omit<softSkillType, "id">[];
+  student_id: number;
 }): Promise<{ success: boolean; data: softSkillType[] }> => {
   const res = await axios.post("/softskills/bulk-create", data);
   return res.data;
