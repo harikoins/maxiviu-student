@@ -1,56 +1,61 @@
-.card-paratext{
-    color: #9DA8B0;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom:5px ;
+.card-paratext {
+  color: #9da8b0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 5px;
 }
-.card-idno{
-    color: #9DA8B0;
-    font-size: small;
+.card-idno {
+  color: #9da8b0;
+  font-size: small;
 }
-.edit-pen-icon{
-    color: #3393FF;
+.edit-pen-icon {
+  color: #3393ff;
 }
-.card-inside-text{
-    color: #97A2AB;
+.card-inside-text {
+  color: #97a2ab;
 }
 
-.profile-card{
-    height: 80px !important;
+.profile-card {
+  height: 80px !important;
 }
 
 .cardWrapper {
-    border-radius: 12px;
-    background-color: #f9f9ff;
-    padding: 12px;
-    font-family: "Segoe UI", sans-serif;
-  }
+  border-radius: 12px;
+  background-color: #f9f9ff;
+  padding: 12px;
+  font-family: "Segoe UI", sans-serif;
+}
 
+.custom-thead {
+  --bs-table-border-color: #4b565b !important;
+  text-align: left;
+}
 
-  .custom-thead {
+.custom-thead th {
+  font-weight: 400;
+  background-color: #f8f9fa !important;
+}
 
-    --bs-table-border-color:#4B565B !important;
-    text-align: left;
-  
-    }
+.custom-tbody tr td {
+  /* color: #4B565B !important; */
+}
+.custom-td {
+  color: #4b565b !important;
+}
 
-    .custom-thead th {
-        font-weight: 400;
-        background-color: #F8F9FA !important;
-      }
+.custom-tbody tr {
+  text-align: left;
+}
 
-      .custom-tbody tr td {
-        /* color: #4B565B !important; */
-        
-      }
-    .custom-td{
-        color: #4B565B !important;
-    }
+.custom-tbody span {
+  color: #4b565b !important;
+}
 
-      .custom-tbody tr{
-        text-align: left;
-      }
+.icon-hover {
+  transition: transform 0.2s ease;
+}
 
-      .custom-tbody span {
-        color: #4B565B !important;
-      }
+.icon-hover:hover {
+  transform: translateY(-4px); /* Adjust upward movement as needed */
+  cursor: pointer;
+}

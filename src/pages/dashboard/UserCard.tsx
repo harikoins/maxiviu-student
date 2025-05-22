@@ -8,6 +8,7 @@ import {
   Space,
   Tooltip,
   Skeleton,
+  Flex,
 } from "antd";
 import {
   EditOutlined,
@@ -25,6 +26,7 @@ import Linkedin from "../../assets/Dashboard/linkedin.png";
 import Verified from "../../assets/Dashboard/verified.svg";
 import styles from "../../components/styles/Dashboard.module.css";
 import type { studentType } from "../../services/studentService";
+import dayjs from "dayjs";
 
 const { Title, Paragraph } = Typography;
 
@@ -37,7 +39,7 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
   return (
     <>
       {!student.id ? (
-        <Card bordered={false} className="rounded-4 pb-4 mb-4">
+        <Card className="rounded-4 pb-4 mb-4">
           <Row gutter={16} align="middle">
             <Col xs={24} sm={8} className="d-flex justify-content-center">
               <Skeleton.Avatar
@@ -91,24 +93,31 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
             <Col xs={24} sm={16}>
               <Card.Meta
                 title={
-                  <Space align="center" size="small">
-                    <Title level={4} style={{ marginBottom: 0 }}>
-                      {`${student.firstname} ${student.lastname}`}
-                    </Title>
-                    <Image
-                      src={Verified}
-                      alt="verified"
-                      width={25}
-                      height={25}
-                      preview={false}
-                    />
+                  <Flex
+                    justify="space-between"
+                    align="items-center"
+                    style={{ width: "100%" }}
+                  >
+                    <Flex align="center" gap="small">
+                      <Title level={4} style={{ marginBottom: 0 }}>
+                        {`${student.firstname} ${student.lastname}`}
+                      </Title>
+                      <Image
+                        src={Verified}
+                        alt="verified"
+                        width={25}
+                        height={25}
+                        preview={false}
+                      />
+                    </Flex>
+
                     <Tooltip title="Edit">
                       <EditOutlined
                         className={styles["edit-pen-icon"]}
                         style={{ fontSize: "1.25rem" }}
                       />
                     </Tooltip>
-                  </Space>
+                  </Flex>
                 }
                 description={
                   <>
@@ -142,7 +151,10 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
                         </a>
                       </Paragraph>
                       <Paragraph className={styles["card-paratext"]}>
-                        <CalendarOutlined /> DOB May 8 of 2012
+                        <CalendarOutlined />{" "}
+                        <small>
+                          DOB {dayjs(student.dob).format("MMM D [of] YYYY")}
+                        </small>
                       </Paragraph>
                     </Space>
                     <Space size="middle" className="mt-2">
@@ -152,7 +164,10 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
                         width={30}
                         height={30}
                         preview={false}
-                       onClick={() => window.open(`${student.profile_github}`, "_blank")}
+                        className={styles["icon-hover"]}
+                        onClick={() =>
+                          window.open(`${student.profile_github}`, "_blank")
+                        }
                       />
                       <Image
                         src={Reddit}
@@ -160,6 +175,10 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
                         width={30}
                         height={30}
                         preview={false}
+                        className={styles["icon-hover"]}
+                        onClick={() =>
+                          window.open(`${student.profile_reddit}`, "_blank")
+                        }
                       />
                       <Image
                         src={Linkedin}
@@ -167,6 +186,10 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
                         width={30}
                         height={30}
                         preview={false}
+                        className={styles["icon-hover"]}
+                        onClick={() =>
+                          window.open(`${student.profile_linkedin}`, "_blank")
+                        }
                       />
                       <Image
                         src={Be}
@@ -174,6 +197,10 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
                         width={30}
                         height={30}
                         preview={false}
+                        className={styles["icon-hover"]}
+                        onClick={() =>
+                          window.open(`${student.profile_behance}`, "_blank")
+                        }
                       />
                     </Space>
                   </>

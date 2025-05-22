@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Steps,
-  Button,
-  Form,
-  Input,
-  AutoComplete,
-  DatePicker,
-} from "antd";
+import { Steps, Button, Form, Input, AutoComplete, DatePicker } from "antd";
 import { setUser, userSignal, type UserType } from "../../signals/userSignals";
 import type { courseType } from "../../services/courseService";
 import type { departmentType } from "../../services/departmentService";
@@ -118,6 +111,18 @@ const StudentForm: React.FC = () => {
             rules={[{ required: true, message: "Please enter last name" }]}
           >
             <Input placeholder="John Doe" />
+          </Form.Item>
+          {/* Date of Birth Field */}
+          <Form.Item
+            name="dob"
+            label="Date of Birth"
+            rules={[{ required: true, message: "Please select date of birth" }]}
+          >
+            <DatePicker
+              style={{ width: "100%" }}
+              placeholder="Select date"
+              format={"DD-MM-YYYY"}
+            />
           </Form.Item>
           <Form.Item
             name="mobile"
@@ -347,6 +352,13 @@ const StudentForm: React.FC = () => {
           >
             <Input placeholder="(e.g., https://www.behance.net/yourname)" />
           </Form.Item>
+          <Form.Item
+            name="profile_reddit"
+            label="Reddit"
+            rules={[{ required: true, message: "Please enter reddit link" }]}
+          >
+            <Input placeholder="(e.g., https://www.reddit.in/yourname)" />
+          </Form.Item>
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
@@ -358,6 +370,7 @@ const StudentForm: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFormSubmit = async (values: any, step: number) => {
     const updatedFormData = { ...formData, ...values };
+
 
     if (updatedFormData.joinYear?.year) {
       updatedFormData.joinYear = updatedFormData.joinYear.year();
@@ -382,8 +395,10 @@ const StudentForm: React.FC = () => {
         pphoneno: updatedFormData.mobile,
         sphoneno: updatedFormData.mobile,
         profile_behance: updatedFormData.profile_behance,
+        profile_reddit: updatedFormData.profile_reddit,
         profile_github: updatedFormData.profile_github,
         profile_linkedin: updatedFormData.profile_linkedin,
+        dob: updatedFormData.dob.toDate(),
       };
       try {
         const response = await createstudent(finalData);
@@ -396,7 +411,7 @@ const StudentForm: React.FC = () => {
             });
           }
           navigate(`/dashboard`);
-          showSuccessToast("Submitted Successfully.")
+          showSuccessToast("Submitted Successfully.");
         } else {
           showErrorToast("An unexpected error occurred. Please try again.");
         }

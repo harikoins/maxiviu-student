@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import { Button, Card, Progress, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import DocumentDrawer from "./DocumentDrawer";
+import ProjectDrawer from "./ProjectDrawer";
+// import DocumentDrawer from "./DocumentDrawer";
 
 const RightSideCards: React.FC = () => {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
 
-  const handleClose = () => {setOpen(false)};
-  const handleOpen = () => {setOpen(true)};
+  // const handleClose = () => {setOpen(false)};
+  // const handleOpen = () => {setOpen(true)};
+
+    const [openProject, setOpenProject] = useState(false);
+
+  const handleProjectClose = () => {setOpenProject(false)};
+  const handleProjectOpen = () => {setOpenProject(true)};
 
   const documents = [
     { name: "Resume", action: "View" },
@@ -83,7 +89,7 @@ const RightSideCards: React.FC = () => {
               Documents
             </Typography.Title>
             <Button shape="circle" icon={<PlusOutlined />} onClick={()=>{
-              handleOpen();
+              // handleOpen();
             }}/>
           </div>
         }
@@ -109,10 +115,9 @@ const RightSideCards: React.FC = () => {
             <Typography.Title level={5} style={{ margin: 0 }}>
               Projects & Innovations
             </Typography.Title>
-            <Button shape="circle" icon={<PlusOutlined />} />
+            <Button shape="circle" icon={<PlusOutlined />} onClick={handleProjectOpen} />
           </div>
         }
-        bordered={false}
         className="mt-3"
       >
         {projects.map((project, index) => (
@@ -164,7 +169,9 @@ const RightSideCards: React.FC = () => {
           Show more
         </Typography.Link>
       </Card>
-      <DocumentDrawer open={open} handleClose={handleClose} handleOpen={handleOpen}/>
+      {/* <DocumentDrawer open={open} handleClose={handleClose} handleOpen={handleOpen}/> */}
+
+      <ProjectDrawer  openProject={openProject} handleProjectClose={handleProjectClose} handleProjectOpen={handleProjectOpen} />
     </>
   );
 };

@@ -43,13 +43,15 @@ export interface studentType {
   website: string;
   join_year: string;
   complete_year: string;
-  mygoal?: string;  // Made optional
+  mygoal?: string; // Made optional
   mystory?: string; // Made optional
   myachievement?: string; // Made optional
   profile_linkedin?: string;
   profile_behance?: string;
   profile_card?: string;
   profile_github?: string;
+  profile_reddit?: string;
+  dob?: string;
   pphoneno?: string;
   sphoneno?: string;
   college_id: number;
@@ -65,11 +67,11 @@ export interface studentType {
   department: DepartmentType;
   degree: DegreeType;
   course: CourseType;
-  documents:DocumentType[];
-  internships:internshipType[];
-  softskills:softSkillType[];
-  technicalskills:technicalSkillType[];
-  certificates:certificationType[];
+  documents: DocumentType[];
+  internships: internshipType[];
+  softskills: softSkillType[];
+  technicalskills: technicalSkillType[];
+  certificates: certificationType[];
 }
 interface PaginatedResponse<T> {
   items: T[];
