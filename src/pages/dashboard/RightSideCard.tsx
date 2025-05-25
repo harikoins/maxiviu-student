@@ -3,7 +3,7 @@ import { Button, Card, Progress, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import ProjectDrawer from "./ProjectDrawer";
 import type { studentType } from "../../services/studentService";
-// import DocumentDrawer from "./DocumentDrawer";
+import DocumentDrawer from "./DocumentDrawer";
 
 interface ChildProps {
   student: studentType;
@@ -11,10 +11,10 @@ interface ChildProps {
 }
 
 const RightSideCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
-  // const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  // const handleClose = () => {setOpen(false)};
-  // const handleOpen = () => {setOpen(true)};
+  const handleClose = () => {setOpen(false)};
+  const handleOpen = () => {setOpen(true)};
 
   const [openProject, setOpenProject] = useState(false);
 
@@ -80,7 +80,7 @@ const RightSideCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
               shape="circle"
               icon={<PlusOutlined />}
               onClick={() => {
-                // handleOpen();
+                handleOpen();
               }}
             />
           </div>
@@ -163,7 +163,7 @@ const RightSideCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
           Show more
         </Typography.Link>
       </Card>
-      {/* <DocumentDrawer open={open} handleClose={handleClose} handleOpen={handleOpen}/> */}
+      <DocumentDrawer open={open} handleClose={handleClose} handleOpen={handleOpen} student={student}/>
 
       <ProjectDrawer
         openProject={openProject}

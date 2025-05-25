@@ -45,7 +45,7 @@ const ProfileDashboard: React.FC = () => {
                 <SkillsComponent student={student} fetchUser={fetchUser} />
               </Col>
               <Col span={24}>
-                <ExtracurricularActivities />
+                <ExtracurricularActivities student={student} fetchUser={fetchUser}/>
               </Col>
             </Row>
           </Col>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Drawer,
   Form,
@@ -20,97 +20,47 @@ import {
 } from "@ant-design/icons";
 import { showErrorToast, showSuccessToast } from "../../utils/toaster";
 import type { studentType } from "../../services/studentService";
-import { createBulkProject } from "../../services/projectService";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
 
-interface ProjectData {
+interface ActivityData {
   id: number;
-  name: string;
-  techskill: string;
-  status: string;
-  duration: string;
-  sourcecodelink: string;
+  category: string;
+  skill: string;
+  description: string;
+  achievement: string;
   certificate?: UploadFile;
 }
 
 interface ChildProps {
-  openProject: boolean;
-  handleProjectClose: () => void;
-  handleProjectOpen: () => void;
+  open: boolean;
+  handleClose: () => void;
+  handleOpen: () => void;
   student: studentType;
   fetchUser: () => void;
 }
 
-const ProjectDrawer: React.FC<ChildProps> = ({
-  openProject,
-  handleProjectClose,
+const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
+  open,
+  handleClose,
   student,
   fetchUser,
 }) => {
-  const [formList, setFormList] = useState<ProjectData[]>([
+  const [formList, setFormList] = useState<ActivityData[]>([
     {
-      name: "",
-      techskill: "",
-      status: "",
-      duration: "",
-      sourcecodelink: "",
+      category: "",
+      skill: "",
+      description: "",
+      achievement: "",
       certificate: undefined,
       id: 0,
     },
   ]);
 
-  const handleDeleteProject = (index: number) => {
+  const handleDeleteActivity = (index: number) => {
     setFormList((prev) => prev.filter((_, i) => i !== index));
   };
-
-  // Update your useEffect for initial data loading
-  useEffect(() => {
-    if (openProject) {
-      if (student?.projects?.length) {
-        const initialProjects = student.projects.map((project) => ({
-          id: project.id,
-          name: project.name || "",
-          techskill: project.techskill || "",
-          status: project.status || "",
-          duration: project.duration || "",
-          sourcecodelink: project.sourcecodelink || "",
-          certificate: project.projectPath
-            ? {
-                uid: `-${project.id}`,
-                name:
-                  project.filename ||
-                  project.projectPath.split(/[\\/]/).pop() ||
-                  "certificate",
-                status: "done" as const,
-                url: `${apiUrl}/${project.projectPath
-                  .replace(/\\/g, "/")
-                  .replace(/^\/+/, "")}`,
-                originFileObj: undefined,
-                response: {
-                  path: project.projectPath,
-                  filename: project.filename,
-                },
-              }
-            : undefined,
-        }));
-        setFormList(initialProjects);
-      } else {
-        setFormList([
-          {
-            name: "",
-            techskill: "",
-            status: "",
-            duration: "",
-            sourcecodelink: "",
-            certificate: undefined,
-            id: 0,
-          },
-        ]);
-      }
-    }
-  }, [openProject, student]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleView = (proj: any) => {
@@ -165,15 +115,14 @@ const ProjectDrawer: React.FC<ChildProps> = ({
     }
   };
 
-  const handleAddProject = () => {
+  const handleAddActivity = () => {
     setFormList([
       ...formList,
       {
-        name: "",
-        techskill: "",
-        status: "",
-        duration: "",
-        sourcecodelink: "",
+        category: "",
+        skill: "",
+        description: "",
+        achievement: "",
         certificate: undefined,
         id: 0,
       },
@@ -182,7 +131,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
 
   const handleChange = (
     index: number,
-    key: keyof ProjectData,
+    key: keyof ActivityData,
     value: string | UploadFile
   ) => {
     const newList = [...formList];
@@ -194,80 +143,76 @@ const ProjectDrawer: React.FC<ChildProps> = ({
   const handleSubmit = () => {
     const hasEmptyFields = formList.some(
       (proj) =>
-        !proj.name ||
-        !proj.techskill ||
-        !proj.status ||
-        !proj.duration ||
-        !proj.sourcecodelink
+        !proj.category || !proj.skill || !proj.description || !proj.achievement
     );
     if (hasEmptyFields) {
-      showErrorToast("Please fill in all fields for every project.");
+      showErrorToast("Please fill in all fields for every activity.");
       return;
     }
 
-    const projectFormData = new FormData();
-    let projectFileIndex = 0;
+    const activityFormData = new FormData();
+    let activityFileIndex = 0;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const projectDatas = formList.map((project: any) => {
-      let projectFilePath = null;
-      let projectFileFlag = null;
+    const activityDatas = formList.map((activity: any) => {
+      let activityFilePath = null;
+      let activityFileFlag = null;
       let fileIndex = null;
 
-      if (project.certificate) {
-        projectFormData.append("files", project.certificate);
-        projectFilePath = project?.certificate?.response?.path
-          ? project.certificate.response.path.replace(/\\\\/g, "\\")
+      if (activity.certificate) {
+        activityFormData.append("files", activity.certificate);
+        activityFilePath = activity?.certificate?.response?.path
+          ? activity.certificate.response.path.replace(/\\\\/g, "\\")
           : "";
-        projectFileFlag = project?.certificate?.response?.filename
-          ? project.certificate.response.filename
+        activityFileFlag = activity?.certificate?.response?.filename
+          ? activity.certificate.response.filename
           : "";
-        fileIndex = projectFileIndex++;
-      } else if (project.projectFile?.projectPath) {
-        projectFilePath = project.projectFile.projectPath;
-        projectFileFlag = project.projectFile.projectPath;
+        fileIndex = activityFileIndex++;
+      } else if (activity.activityFile?.activityPath) {
+        activityFilePath = activity.activityFile.activityPath;
+        activityFileFlag = activity.activityFile.activityPath;
       }
 
       return {
-        name: project.name,
-        techskill: project.techskill,
-        status: project.status || null,
-        duration: project.duration || null,
-        sourcecodelink: project.sourcecodelink,
+        category: activity.category,
+        skill: activity.skill,
+        description: activity.description || null,
+        achievement: activity.achievement || null,
         student_id: student.id,
-        projectFile: projectFileFlag,
-        projectFilePath,
+        activityFile: activityFileFlag,
+        activityFilePath,
         fileIndex,
-        id:project.id
+        id: activity.id,
       };
     });
 
-    projectFormData.append("projectDatas", JSON.stringify(projectDatas));
-    projectFormData.append("student_id", student.id.toString());
+    activityFormData.append("activityDatas", JSON.stringify(activityDatas));
+    activityFormData.append("student_id", student.id.toString());
 
-    createBulkProject(projectFormData);
+ 
     fetchUser();
-    showSuccessToast("All projects submitted successfully!");
-    handleProjectClose();
+    showSuccessToast("All activities submitted successfully!");
+    handleClose();
   };
 
   const handleCancel = () => {
     setFormList([
       {
-        name: "",
-        techskill: "",
-        status: "",
-        duration: "",
-        sourcecodelink: "",
+        category: "",
+        skill: "",
+        description: "",
+        achievement: "",
+
         certificate: undefined,
         id: 0,
       },
     ]);
-    handleProjectClose();
+    handleClose();
   };
 
   return (
     <>
+
       <Drawer
         title={
           <Space
@@ -278,19 +223,19 @@ const ProjectDrawer: React.FC<ChildProps> = ({
             }}
           >
             <Title level={4} style={{ margin: 0 }}>
-              Projects
+              Extracurricular Activities
             </Title>
             <Button
               icon={<PlusOutlined />}
               type="primary"
-              onClick={handleAddProject}
+              onClick={handleAddActivity}
             ></Button>
           </Space>
         }
         placement="right"
         width={550}
         onClose={handleCancel}
-        open={openProject}
+        open={open}
         footer={
           <div style={{ textAlign: "right" }}>
             <Button onClick={handleCancel} style={{ marginRight: 8 }}>
@@ -302,63 +247,56 @@ const ProjectDrawer: React.FC<ChildProps> = ({
           </div>
         }
       >
-        {formList.map((proj, index) => (
+        {formList.map((activity, index) => (
           <Form layout="vertical" key={index}>
             <Space
               style={{ display: "flex", justifyContent: "space-between" }}
               align="center"
             >
-              <Title level={5}>Project {index + 1}</Title>
+              <Title level={5}>Activity {index + 1}</Title>
               <Button
                 type="text"
                 icon={<DeleteOutlined style={{ color: "red" }} />}
-                onClick={() => handleDeleteProject(index)}
+                onClick={() => handleDeleteActivity(index)}
                 danger
               />
             </Space>
-            <Form.Item label="Name of the Project" required>
+            <Form.Item label="Category" required>
               <Input
-                value={proj.name}
-                onChange={(e) => handleChange(index, "name", e.target.value)}
-              />
-            </Form.Item>
-
-            <Form.Item label="Tech Stack" required>
-              <Input
-                value={proj.techskill}
+                value={activity.category}
                 onChange={(e) =>
-                  handleChange(index, "techskill", e.target.value)
+                  handleChange(index, "category", e.target.value)
                 }
               />
             </Form.Item>
 
-            <Form.Item label="Status" required>
+            <Form.Item label="Skill/Specialization" required>
               <Input
-                value={proj.status}
-                onChange={(e) => handleChange(index, "status", e.target.value)}
+                value={activity.skill}
+                onChange={(e) => handleChange(index, "skill", e.target.value)}
               />
             </Form.Item>
 
-            <Form.Item label="Duration" required>
+            <Form.Item label="Description" required>
               <Input.TextArea
                 rows={2}
-                value={proj.duration}
+                value={activity.description}
                 onChange={(e) =>
-                  handleChange(index, "duration", e.target.value)
+                  handleChange(index, "description", e.target.value)
                 }
               />
             </Form.Item>
 
-            <Form.Item label="Code Source Link" required>
+            <Form.Item label="Achievement" required>
               <Input
-                value={proj.sourcecodelink}
+                value={activity.achievement}
                 onChange={(e) =>
-                  handleChange(index, "sourcecodelink", e.target.value)
+                  handleChange(index, "achievement", e.target.value)
                 }
               />
             </Form.Item>
 
-            <Form.Item label="Add Certificate">
+            <Form.Item label="Add Certificate/Photos">
               <Upload
                 beforeUpload={(file) => {
                   const isAllowedType =
@@ -377,7 +315,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
               >
                 <Button icon={<UploadOutlined />}>Upload Certificate</Button>
               </Upload>
-              {proj.certificate && (
+              {activity.certificate && (
                 <div
                   style={{
                     marginTop: 8,
@@ -386,7 +324,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
                     gap: 8,
                   }}
                 >
-                  {proj.certificate.type === "application/pdf" ? (
+                  {activity.certificate.type === "application/pdf" ? (
                     <FilePdfOutlined
                       style={{ fontSize: 24, color: "#d32029" }}
                     />
@@ -395,12 +333,12 @@ const ProjectDrawer: React.FC<ChildProps> = ({
                       style={{ fontSize: 24, color: "#1890ff" }}
                     />
                   )}
-                  <span style={{ flex: 1 }}>{proj.certificate.name}</span>
+                  <span style={{ flex: 1 }}>{activity.certificate.name}</span>
                   <Button
                     type="text"
                     icon={<EyeOutlined />}
                     onClick={() => {
-                      handleView(proj);
+                      handleView(activity);
                     }}
                   >
                     View
@@ -417,4 +355,4 @@ const ProjectDrawer: React.FC<ChildProps> = ({
   );
 };
 
-export default ProjectDrawer;
+export default ExtraCurricularActivityDrawer;
