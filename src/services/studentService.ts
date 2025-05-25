@@ -3,6 +3,7 @@ import type { softSkillType } from "./softskillsService";
 import type { technicalSkillType } from "./technicalskillService";
 import type { internshipType } from "./internshipService";
 import type { certificationType } from "./certificationService";
+import type { projectType } from "./projectService";
 
 interface userType {
   id: number;
@@ -72,6 +73,7 @@ export interface studentType {
   softskills: softSkillType[];
   technicalskills: technicalSkillType[];
   certificates: certificationType[];
+  projects:projectType[];
 }
 interface PaginatedResponse<T> {
   items: T[];

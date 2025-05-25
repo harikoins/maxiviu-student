@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   Form,
@@ -16,16 +16,22 @@ import {
   FilePdfOutlined,
   FileImageOutlined,
   EyeOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
+import { showErrorToast, showSuccessToast } from "../../utils/toaster";
+import type { studentType } from "../../services/studentService";
+import { createBulkProject } from "../../services/projectService";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
 
 interface ProjectData {
-  projectName: string;
-  techStack: string;
+  id: number;
+  name: string;
+  techskill: string;
   status: string;
   duration: string;
-  codeLink: string;
+  sourcecodelink: string;
   certificate?: UploadFile;
 }
 
@@ -33,34 +39,144 @@ interface ChildProps {
   openProject: boolean;
   handleProjectClose: () => void;
   handleProjectOpen: () => void;
+  student: studentType;
+  fetchUser: () => void;
 }
 
 const ProjectDrawer: React.FC<ChildProps> = ({
   openProject,
   handleProjectClose,
   handleProjectOpen,
+  student,
+  fetchUser,
 }) => {
   const [formList, setFormList] = useState<ProjectData[]>([
     {
-      projectName: "",
-      techStack: "",
+      name: "",
+      techskill: "",
       status: "",
       duration: "",
-      codeLink: "",
+      sourcecodelink: "",
       certificate: undefined,
+      id: 0,
     },
   ]);
+
+  const handleDeleteProject = (index: number) => {
+    setFormList((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Update your useEffect for initial data loading
+  useEffect(() => {
+    if (openProject) {
+      if (student?.projects?.length) {
+        const initialProjects = student.projects.map((project) => ({
+          id: project.id,
+          name: project.name || "",
+          techskill: project.techskill || "",
+          status: project.status || "",
+          duration: project.duration || "",
+          sourcecodelink: project.sourcecodelink || "",
+          certificate: project.projectPath
+            ? {
+                uid: `-${project.id}`,
+                name:
+                  project.filename ||
+                  project.projectPath.split(/[\\/]/).pop() ||
+                  "certificate",
+                status: "done" as const,
+                url: `${apiUrl}/${project.projectPath
+                  .replace(/\\/g, "/")
+                  .replace(/^\/+/, "")}`,
+                originFileObj: undefined,
+                response: {
+                  path: project.projectPath,
+                  filename: project.filename,
+                },
+              }
+            : undefined,
+        }));
+        setFormList(initialProjects);
+      } else {
+        setFormList([
+          {
+            name: "",
+            techskill: "",
+            status: "",
+            duration: "",
+            sourcecodelink: "",
+            certificate: undefined,
+            id: 0,
+          },
+        ]);
+      }
+    }
+  }, [openProject, student]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleView = (proj: any) => {
+    const file = proj.certificate;
+
+    if (!file) {
+      message.error("No file available to view");
+      return;
+    }
+
+    let fileURL: string | undefined;
+
+    // Case 1: Newly uploaded file (has originFileObj)
+    if (
+      file instanceof File ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (file as any).originFileObj instanceof File
+    ) {
+      const fileObj =
+        file instanceof File
+          ? file
+          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (file as any).originFileObj;
+      fileURL = URL.createObjectURL(fileObj);
+    }
+    // Case 2: File from server response (has URL)
+    else if (file.url) {
+      // Ensure URL is absolute (prepend apiUrl if it's a relative path)
+      fileURL = file.url.startsWith("http")
+        ? file.url
+        : `${apiUrl}/${file.url.replace(/^\/+/, "")}`;
+    }
+    // Case 3: File from DB (path in response object)
+    else if (file.response?.path) {
+      const normalizedPath = file.response.path
+        .replace(/\\/g, "/")
+        .replace(/^\/+/, "");
+      fileURL = `${apiUrl}/${normalizedPath}`;
+    }
+    // Case 4: File has thumbUrl (for images)
+    else if (file.thumbUrl) {
+      fileURL = file.thumbUrl;
+    }
+
+    if (fileURL) {
+      // Clean up any double slashes in the URL
+      fileURL = fileURL.replace(/([^:]\/)\/+/g, "$1");
+      window.open(fileURL, "_blank");
+    } else {
+      message.error("Cannot open file - no valid file source available");
+      console.error("File object structure:", file);
+    }
+  };
 
   const handleAddProject = () => {
     setFormList([
       ...formList,
       {
-        projectName: "",
-        techStack: "",
+        name: "",
+        techskill: "",
         status: "",
         duration: "",
-        codeLink: "",
+        sourcecodelink: "",
         certificate: undefined,
+        id: 0,
       },
     ]);
   };
@@ -79,41 +195,76 @@ const ProjectDrawer: React.FC<ChildProps> = ({
   const handleSubmit = () => {
     const hasEmptyFields = formList.some(
       (proj) =>
-        !proj.projectName ||
-        !proj.techStack ||
+        !proj.name ||
+        !proj.techskill ||
         !proj.status ||
         !proj.duration ||
-        !proj.codeLink
+        !proj.sourcecodelink
     );
     if (hasEmptyFields) {
-      message.error("Please fill in all fields for every project.");
+      showErrorToast("Please fill in all fields for every project.");
       return;
     }
 
+    console.log(formList, "formList");
+
+    const projectFormData = new FormData();
+    let projectFileIndex = 0;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const projectDatas = formList.map((project: any) => {
+      let projectFilePath = null;
+      let projectFileFlag = null;
+      let fileIndex = null;
+
+      if (project.certificate) {
+        projectFormData.append("files", project.certificate);
+        projectFilePath = project?.certificate?.response?.path
+          ? project.certificate.response.path.replace(/\\\\/g, "\\")
+          : "";
+        projectFileFlag = project?.certificate?.response?.filename
+          ? project.certificate.response.filename
+          : "";
+        fileIndex = projectFileIndex++;
+      } else if (project.projectFile?.projectPath) {
+        projectFilePath = project.projectFile.projectPath;
+        projectFileFlag = project.projectFile.projectPath;
+      }
+
+      return {
+        name: project.name,
+        techskill: project.techskill,
+        status: project.status || null,
+        duration: project.duration || null,
+        sourcecodelink: project.sourcecodelink,
+        student_id: student.id,
+        projectFile: projectFileFlag,
+        projectFilePath,
+        fileIndex,
+        id:project.id
+      };
+    });
+
+    projectFormData.append("projectDatas", JSON.stringify(projectDatas));
+    projectFormData.append("student_id", student.id.toString());
+
+    createBulkProject(projectFormData);
+    fetchUser();
     console.log("Submitted projects:", formList);
-    message.success("All projects submitted successfully!");
-    setFormList([
-      {
-        projectName: "",
-        techStack: "",
-        status: "",
-        duration: "",
-        codeLink: "",
-        certificate: undefined,
-      },
-    ]);
+    showSuccessToast("All projects submitted successfully!");
     handleProjectClose();
   };
 
   const handleCancel = () => {
     setFormList([
       {
-        projectName: "",
-        techStack: "",
+        name: "",
+        techskill: "",
         status: "",
         duration: "",
-        codeLink: "",
+        sourcecodelink: "",
         certificate: undefined,
+        id: 0,
       },
     ]);
     handleProjectClose();
@@ -141,9 +292,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
               icon={<PlusOutlined />}
               type="primary"
               onClick={handleAddProject}
-            >
-              Add
-            </Button>
+            ></Button>
           </Space>
         }
         placement="right"
@@ -163,26 +312,30 @@ const ProjectDrawer: React.FC<ChildProps> = ({
       >
         {formList.map((proj, index) => (
           <Form layout="vertical" key={index}>
-            <Title level={5}>Project {index + 1}</Title>
-            <Form.Item
-              label="Name of the Project"
-              required
-              name={`projectName_${index}`} // you can add a unique name for each input in a dynamic form
-              rules={[{ required: true, message: "Please enter project name" }]}
+            <Space
+              style={{ display: "flex", justifyContent: "space-between" }}
+              align="center"
             >
+              <Title level={5}>Project {index + 1}</Title>
+              <Button
+                type="text"
+                icon={<DeleteOutlined style={{ color: "red" }} />}
+                onClick={() => handleDeleteProject(index)}
+                danger
+              />
+            </Space>
+            <Form.Item label="Name of the Project" required>
               <Input
-                value={proj.projectName}
-                onChange={(e) =>
-                  handleChange(index, "projectName", e.target.value)
-                }
+                value={proj.name}
+                onChange={(e) => handleChange(index, "name", e.target.value)}
               />
             </Form.Item>
 
             <Form.Item label="Tech Stack" required>
               <Input
-                value={proj.techStack}
+                value={proj.techskill}
                 onChange={(e) =>
-                  handleChange(index, "techStack", e.target.value)
+                  handleChange(index, "techskill", e.target.value)
                 }
               />
             </Form.Item>
@@ -206,9 +359,9 @@ const ProjectDrawer: React.FC<ChildProps> = ({
 
             <Form.Item label="Code Source Link" required>
               <Input
-                value={proj.codeLink}
+                value={proj.sourcecodelink}
                 onChange={(e) =>
-                  handleChange(index, "codeLink", e.target.value)
+                  handleChange(index, "sourcecodelink", e.target.value)
                 }
               />
             </Form.Item>
@@ -256,10 +409,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
                     type="text"
                     icon={<EyeOutlined />}
                     onClick={() => {
-                      const fileURL = URL.createObjectURL(
-                        proj.certificate as unknown as Blob
-                      );
-                      window.open(fileURL, "_blank");
+                      handleView(proj);
                     }}
                   >
                     View
