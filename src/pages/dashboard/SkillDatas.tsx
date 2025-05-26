@@ -290,51 +290,68 @@ const SkillsComponent: React.FC<ChildProps> = ({ student, fetchUser }) => {
         activeKey={activeKey}
         onChange={setActiveKey}
         type={screens.xs ? "line" : "card"}
-        tabPosition={screens.xs ? "top" : "top"}
+        tabPosition="top"
         centered
         className="skills-tabs"
-      >
-        <Tabs.TabPane tab="Technical" key="technical">
-          <Table
-            columns={columnsTechnical}
-            dataSource={student?.technicalskills}
-            rowKey="skill"
-            pagination={false}
-            scroll={{ x: true }}
-            size={screens.xs ? "small" : "middle"}
-          />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Soft Skills" key="soft">
-          <Table
-            columns={columnsSoft}
-            dataSource={student?.softskills}
-            rowKey="skill"
-            pagination={false}
-            scroll={{ x: true }}
-            size={screens.xs ? "small" : "middle"}
-          />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Certifications" key="certifications">
-          <Table
-            columns={columnsCertification}
-            dataSource={student.certificates}
-            rowKey="name"
-            pagination={false}
-            scroll={{ x: true }}
-            size={screens.xs ? "small" : "middle"}
-          />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Internships" key="internships">
-          <Table
-            columns={columnsInternship}
-            dataSource={student?.internships}
-            rowKey="role"
-            pagination={false}
-            scroll={{ x: true }}
-            size={screens.xs ? "small" : "middle"}
-          />
-        </Tabs.TabPane>
-      </Tabs>
+        items={[
+          {
+            label: "Technical",
+            key: "technical",
+            children: (
+              <Table
+                columns={columnsTechnical}
+                dataSource={student?.technicalskills}
+                rowKey="skill"
+                pagination={false}
+                scroll={{ x: true }}
+                size={screens.xs ? "small" : "middle"}
+              />
+            ),
+          },
+          {
+            label: "Soft Skills",
+            key: "soft",
+            children: (
+              <Table
+                columns={columnsSoft}
+                dataSource={student?.softskills}
+                rowKey="skill"
+                pagination={false}
+                scroll={{ x: true }}
+                size={screens.xs ? "small" : "middle"}
+              />
+            ),
+          },
+          {
+            label: "Certifications",
+            key: "certifications",
+            children: (
+              <Table
+                columns={columnsCertification}
+                dataSource={student?.certificates}
+                rowKey="name"
+                pagination={false}
+                scroll={{ x: true }}
+                size={screens.xs ? "small" : "middle"}
+              />
+            ),
+          },
+          {
+            label: "Internships",
+            key: "internships",
+            children: (
+              <Table
+                columns={columnsInternship}
+                dataSource={student?.internships}
+                rowKey="role"
+                pagination={false}
+                scroll={{ x: true }}
+                size={screens.xs ? "small" : "middle"}
+              />
+            ),
+          },
+        ]}
+      />
 
       <SkillsDrawer
         open={open}

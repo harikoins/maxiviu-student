@@ -76,7 +76,6 @@ const DocumentDrawer: React.FC<DrawerType> = ({
     documentpath: string,
     filename: string
   ): Promise<File> => {
-    console.log(documentpath)
     try {
       // Construct the complete URL
       const completeUrl = documentpath.startsWith("http")

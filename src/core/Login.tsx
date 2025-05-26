@@ -404,7 +404,6 @@ const AuthPage: React.FC = () => {
             borderRadius: 8,
             padding: "16px",
           }}
-          bodyStyle={{ padding: "16px" }}
         >
           <div style={{ textAlign: "center", marginBottom: 16 }}>
             <Title level={4} style={{ marginBottom: 8 }}>

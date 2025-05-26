@@ -191,7 +191,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
     setFormList(newList);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const hasEmptyFields = formList.some(
       (proj) =>
         !proj.name ||
@@ -238,15 +238,15 @@ const ProjectDrawer: React.FC<ChildProps> = ({
         projectFile: projectFileFlag,
         projectFilePath,
         fileIndex,
-        id:project.id
+        id: project.id,
       };
     });
 
     projectFormData.append("projectDatas", JSON.stringify(projectDatas));
     projectFormData.append("student_id", student.id.toString());
 
-    createBulkProject(projectFormData);
-    fetchUser();
+    await createBulkProject(projectFormData);
+    await fetchUser();
     showSuccessToast("All projects submitted successfully!");
     handleProjectClose();
   };

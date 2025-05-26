@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   Form,
@@ -9,6 +10,7 @@ import {
   Typography,
   message,
   type UploadFile,
+  List,
 } from "antd";
 import {
   PlusOutlined,
@@ -20,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import { showErrorToast, showSuccessToast } from "../../utils/toaster";
 import type { studentType } from "../../services/studentService";
+import { createBulkExtracurricularActivity } from "../../services/extracurricularActivityService";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
@@ -30,7 +33,7 @@ interface ActivityData {
   skill: string;
   description: string;
   achievement: string;
-  certificate?: UploadFile;
+  certificates: UploadFile[];
 }
 
 interface ChildProps {
@@ -53,19 +56,62 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
       skill: "",
       description: "",
       achievement: "",
-      certificate: undefined,
+      certificates: [],
       id: 0,
     },
   ]);
+
+  useEffect(() => {
+    console.log("Drawer opened with student:", student);
+    if (open) {
+      if (student?.activities?.length) {
+        const initialActivities = student.activities.map((activity) => ({
+          id: activity.id,
+          category: activity.category || "",
+          skill: activity.skill || "",
+          description: activity.description || "",
+          achievement: activity.achievement || "",
+          certificates: activity.filePath
+            ? activity.filePath.split("|").map((path, index) => ({
+                uid: `-${activity.id}-${index}`,
+                name:
+                  activity.filename?.split("|")[index] ||
+                  path.split(/[\\/]/).pop() ||
+                  "certificate",
+                status: "done" as const,
+                url: `${apiUrl}/${path
+                  .replace(/\\/g, "/")
+                  .replace(/^\/+/, "")}`,
+                originFileObj: undefined,
+                response: {
+                  path: path,
+                  filename: activity.filename?.split("|")[index],
+                },
+              }))
+            : [],
+        }));
+        setFormList(initialActivities);
+        console.log(initialActivities, "initialActivities");
+      } else {
+        setFormList([
+          {
+            category: "",
+            skill: "",
+            description: "",
+            achievement: "",
+            certificates: [],
+            id: 0,
+          },
+        ]);
+      }
+    }
+  }, [open, student]);
 
   const handleDeleteActivity = (index: number) => {
     setFormList((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleView = (proj: any) => {
-    const file = proj.certificate;
-
+  const handleView = (file: UploadFile) => {
     if (!file) {
       message.error("No file available to view");
       return;
@@ -123,7 +169,7 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
         skill: "",
         description: "",
         achievement: "",
-        certificate: undefined,
+        certificates: [],
         id: 0,
       },
     ]);
@@ -132,15 +178,60 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
   const handleChange = (
     index: number,
     key: keyof ActivityData,
-    value: string | UploadFile
+    value: string | UploadFile[]
   ) => {
     const newList = [...formList];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newList[index][key] as any) = value;
     setFormList(newList);
   };
 
-  const handleSubmit = () => {
+  const handleFileChange = (index: number, info: any) => {
+    const newList = [...formList];
+    // Filter out any files that were removed
+    newList[index].certificates = info.fileList
+      .filter((file: UploadFile) => {
+        const isAllowedType =
+          file.type === "application/pdf" ||
+          file.type?.startsWith("image/") ||
+          (file.originFileObj &&
+            (file.originFileObj.type === "application/pdf" ||
+              file.originFileObj.type?.startsWith("image/")));
+
+        if (!isAllowedType) {
+          message.error(`${file.name} is not an image or PDF file`);
+          return false;
+        }
+        return true;
+      })
+      .map((file: UploadFile) => {
+        if (file.originFileObj) {
+          return file.originFileObj;
+        }
+        return file;
+      });
+
+    setFormList(newList);
+  };
+
+  const handleRemoveFile = (activityIndex: number, fileIndex: number) => {
+    const newList = [...formList];
+    newList[activityIndex].certificates = newList[
+      activityIndex
+    ].certificates.filter((_, index) => index !== fileIndex);
+    setFormList(newList);
+  };
+
+  const getPathOnly = (fullUrl:string) => {
+    try {
+      const url = new URL(fullUrl);
+      return url.pathname.substring(1);
+    } catch {
+      // If it's not a valid URL, return as-is
+      return fullUrl;
+    }
+  };
+
+  const handleSubmit = async () => {
     const hasEmptyFields = formList.some(
       (proj) =>
         !proj.category || !proj.skill || !proj.description || !proj.achievement
@@ -153,25 +244,26 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
     const activityFormData = new FormData();
     let activityFileIndex = 0;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const activityDatas = formList.map((activity: any) => {
-      let activityFilePath = null;
-      let activityFileFlag = null;
-      let fileIndex = null;
+    const activityDatas = formList.map((activity) => {
+      const activityFilePaths: any[] = [];
+      const activityFileFlags: any[] = [];
+      const fileIndexes: number[] = [];
 
-      if (activity.certificate) {
-        activityFormData.append("files", activity.certificate);
-        activityFilePath = activity?.certificate?.response?.path
-          ? activity.certificate.response.path.replace(/\\\\/g, "\\")
-          : "";
-        activityFileFlag = activity?.certificate?.response?.filename
-          ? activity.certificate.response.filename
-          : "";
-        fileIndex = activityFileIndex++;
-      } else if (activity.activityFile?.activityPath) {
-        activityFilePath = activity.activityFile.activityPath;
-        activityFileFlag = activity.activityFile.activityPath;
-      }
+      // Handle new files being uploaded
+      activity.certificates.forEach((file) => {
+        if (file instanceof File || (file as any).originFileObj) {
+          const fileObj =
+            file instanceof File ? file : (file as any).originFileObj;
+          activityFormData.append("files", fileObj);
+          fileIndexes.push(activityFileIndex++);
+        } else if (file.url || file.response?.path) {
+          // Handle existing files from server
+          // const path = file.url || file.response.path;
+          const path = getPathOnly(file.url || file.response.path);
+          activityFilePaths.push(path);
+          activityFileFlags.push(path);
+        }
+      });
 
       return {
         category: activity.category,
@@ -179,9 +271,9 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
         description: activity.description || null,
         achievement: activity.achievement || null,
         student_id: student.id,
-        activityFile: activityFileFlag,
-        activityFilePath,
-        fileIndex,
+        activityFiles: activityFileFlags,
+        activityFilePaths,
+        fileIndexes,
         id: activity.id,
       };
     });
@@ -189,8 +281,10 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
     activityFormData.append("activityDatas", JSON.stringify(activityDatas));
     activityFormData.append("student_id", student.id.toString());
 
- 
-    fetchUser();
+    await createBulkExtracurricularActivity(activityFormData);
+
+    console.log(activityDatas, "activityDatas");
+    await fetchUser();
     showSuccessToast("All activities submitted successfully!");
     handleClose();
   };
@@ -202,8 +296,7 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
         skill: "",
         description: "",
         achievement: "",
-
-        certificate: undefined,
+        certificates: [],
         id: 0,
       },
     ]);
@@ -211,147 +304,148 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
   };
 
   return (
-    <>
-
-      <Drawer
-        title={
+    <Drawer
+      title={
+        <Space
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <Title level={4} style={{ margin: 0 }}>
+            Extracurricular Activities
+          </Title>
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={handleAddActivity}
+          ></Button>
+        </Space>
+      }
+      placement="right"
+      width={550}
+      onClose={handleCancel}
+      open={open}
+      footer={
+        <div style={{ textAlign: "right" }}>
+          <Button onClick={handleCancel} style={{ marginRight: 8 }}>
+            Cancel
+          </Button>
+          <Button type="primary" onClick={handleSubmit}>
+            Submit
+          </Button>
+        </div>
+      }
+    >
+      {formList.map((activity, index) => (
+        <Form layout="vertical" key={index}>
           <Space
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
+            style={{ display: "flex", justifyContent: "space-between" }}
+            align="center"
           >
-            <Title level={4} style={{ margin: 0 }}>
-              Extracurricular Activities
-            </Title>
+            <Title level={5}>Activity {index + 1}</Title>
             <Button
-              icon={<PlusOutlined />}
-              type="primary"
-              onClick={handleAddActivity}
-            ></Button>
+              type="text"
+              icon={<DeleteOutlined style={{ color: "red" }} />}
+              onClick={() => handleDeleteActivity(index)}
+              danger
+            />
           </Space>
-        }
-        placement="right"
-        width={550}
-        onClose={handleCancel}
-        open={open}
-        footer={
-          <div style={{ textAlign: "right" }}>
-            <Button onClick={handleCancel} style={{ marginRight: 8 }}>
-              Cancel
-            </Button>
-            <Button type="primary" onClick={handleSubmit}>
-              Submit
-            </Button>
-          </div>
-        }
-      >
-        {formList.map((activity, index) => (
-          <Form layout="vertical" key={index}>
-            <Space
-              style={{ display: "flex", justifyContent: "space-between" }}
-              align="center"
+          <Form.Item label="Category" required>
+            <Input
+              value={activity.category}
+              onChange={(e) => handleChange(index, "category", e.target.value)}
+            />
+          </Form.Item>
+
+          <Form.Item label="Skill/Specialization" required>
+            <Input
+              value={activity.skill}
+              onChange={(e) => handleChange(index, "skill", e.target.value)}
+            />
+          </Form.Item>
+
+          <Form.Item label="Description" required>
+            <Input.TextArea
+              rows={2}
+              value={activity.description}
+              onChange={(e) =>
+                handleChange(index, "description", e.target.value)
+              }
+            />
+          </Form.Item>
+
+          <Form.Item label="Achievement" required>
+            <Input
+              value={activity.achievement}
+              onChange={(e) =>
+                handleChange(index, "achievement", e.target.value)
+              }
+            />
+          </Form.Item>
+
+          <Form.Item label="Add Certificates/Photos">
+            <Upload
+              multiple
+              beforeUpload={(file) => {
+                const isAllowedType =
+                  file.type === "application/pdf" ||
+                  file.type.startsWith("image/");
+                if (!isAllowedType) {
+                  message.error("Only images and PDF files are allowed!");
+                  return Upload.LIST_IGNORE;
+                }
+                return false; // prevent automatic upload
+              }}
+              onChange={(info) => handleFileChange(index, info)}
+              fileList={[]}
+              showUploadList={false}
+              accept=".png,.jpg,.jpeg,.gif,.bmp,.webp,.pdf"
             >
-              <Title level={5}>Activity {index + 1}</Title>
-              <Button
-                type="text"
-                icon={<DeleteOutlined style={{ color: "red" }} />}
-                onClick={() => handleDeleteActivity(index)}
-                danger
-              />
-            </Space>
-            <Form.Item label="Category" required>
-              <Input
-                value={activity.category}
-                onChange={(e) =>
-                  handleChange(index, "category", e.target.value)
-                }
-              />
-            </Form.Item>
-
-            <Form.Item label="Skill/Specialization" required>
-              <Input
-                value={activity.skill}
-                onChange={(e) => handleChange(index, "skill", e.target.value)}
-              />
-            </Form.Item>
-
-            <Form.Item label="Description" required>
-              <Input.TextArea
-                rows={2}
-                value={activity.description}
-                onChange={(e) =>
-                  handleChange(index, "description", e.target.value)
-                }
-              />
-            </Form.Item>
-
-            <Form.Item label="Achievement" required>
-              <Input
-                value={activity.achievement}
-                onChange={(e) =>
-                  handleChange(index, "achievement", e.target.value)
-                }
-              />
-            </Form.Item>
-
-            <Form.Item label="Add Certificate/Photos">
-              <Upload
-                beforeUpload={(file) => {
-                  const isAllowedType =
-                    file.type === "application/pdf" ||
-                    file.type.startsWith("image/");
-                  if (!isAllowedType) {
-                    message.error("Only images and PDF files are allowed!");
-                    return Upload.LIST_IGNORE;
-                  }
-                  handleChange(index, "certificate", file);
-                  return false; // prevent automatic upload
-                }}
-                maxCount={1}
-                showUploadList={false}
-                accept=".png,.jpg,.jpeg,.gif,.bmp,.webp,.pdf"
-              >
-                <Button icon={<UploadOutlined />}>Upload Certificate</Button>
-              </Upload>
-              {activity.certificate && (
-                <div
-                  style={{
-                    marginTop: 8,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
+              <Button icon={<UploadOutlined />}>Upload Certificates</Button>
+            </Upload>
+            <List
+              dataSource={activity.certificates}
+              renderItem={(file, fileIndex) => (
+                <List.Item
+                  actions={[
+                    <Button
+                      type="text"
+                      icon={<EyeOutlined />}
+                      onClick={() => handleView(file)}
+                    />,
+                    <Button
+                      type="text"
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleRemoveFile(index, fileIndex)}
+                      danger
+                    />,
+                  ]}
                 >
-                  {activity.certificate.type === "application/pdf" ? (
-                    <FilePdfOutlined
-                      style={{ fontSize: 24, color: "#d32029" }}
-                    />
-                  ) : (
-                    <FileImageOutlined
-                      style={{ fontSize: 24, color: "#1890ff" }}
-                    />
-                  )}
-                  <span style={{ flex: 1 }}>{activity.certificate.name}</span>
-                  <Button
-                    type="text"
-                    icon={<EyeOutlined />}
-                    onClick={() => {
-                      handleView(activity);
-                    }}
-                  >
-                    View
-                  </Button>
-                </div>
+                  <List.Item.Meta
+                    avatar={
+                      file.type === "application/pdf" ? (
+                        <FilePdfOutlined
+                          style={{ fontSize: 24, color: "#d32029" }}
+                        />
+                      ) : (
+                        <FileImageOutlined
+                          style={{ fontSize: 24, color: "#1890ff" }}
+                        />
+                      )
+                    }
+                    title={file.name}
+                  />
+                </List.Item>
               )}
-            </Form.Item>
+            />
+          </Form.Item>
 
-            <div style={{ borderBottom: "1px solid #ddd", marginBottom: 16 }} />
-          </Form>
-        ))}
-      </Drawer>
-    </>
+          <div style={{ borderBottom: "1px solid #ddd", marginBottom: 16 }} />
+        </Form>
+      ))}
+    </Drawer>
   );
 };
 

@@ -4,6 +4,7 @@ import type { technicalSkillType } from "./technicalskillService";
 import type { internshipType } from "./internshipService";
 import type { certificationType } from "./certificationService";
 import type { projectType } from "./projectService";
+import type { ActivityType } from "./extracurricularActivityService";
 
 interface userType {
   id: number;
@@ -74,6 +75,7 @@ export interface studentType {
   technicalskills: technicalSkillType[];
   certificates: certificationType[];
   projects:projectType[];
+  activities:ActivityType[];
 }
 interface PaginatedResponse<T> {
   items: T[];

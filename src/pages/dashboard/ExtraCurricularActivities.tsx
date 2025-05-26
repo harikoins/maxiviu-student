@@ -1,64 +1,21 @@
 import React, { useState } from "react";
-import { Button, Card, Space, Typography, Grid } from "antd";
-import {
-  PictureOutlined,
-  TeamOutlined,
-  BookOutlined,
-  StarOutlined,
-  SettingOutlined,
-  TrophyOutlined,
-} from "@ant-design/icons";
+import { Button, Card, Typography, Grid, Empty } from "antd";
+import { PictureOutlined } from "@ant-design/icons";
 import ExtraCurricularActivityDrawer from "./ExtraCurricularActivityDrawer";
 import type { studentType } from "../../services/studentService";
+import GalleryDrawer from "./Gallery";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
-interface Activity {
-  icon: React.ReactNode;
-  title: string;
+interface GalleryData {
+  category: string;
+  skill: string;
+  achievement: string;
   description: string;
-  gallery: boolean;
+  filename: string;
+  filePath: string;
 }
-
-const activities: Activity[] = [
-  {
-    icon: <TrophyOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Sports",
-    description: "Football, Cricket, Athletics",
-    gallery: true,
-  },
-  {
-    icon: <StarOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Art and Creativity",
-    description: "Painting, Theatre, Piano",
-    gallery: true,
-  },
-  {
-    icon: <BookOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Academic & Intellectual Pursuits",
-    description: "Robotics Club, Math Olympiads",
-    gallery: true,
-  },
-  {
-    icon: <SettingOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Technology & STEM Activities",
-    description: "Hackathon, Gaming and esports",
-    gallery: false,
-  },
-  {
-    icon: <TeamOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Community Service & Leadership",
-    description: "Volunteering, Social Awareness Campaigns",
-    gallery: false,
-  },
-  {
-    icon: <StarOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Hobbies & Special Interests",
-    description: "Book Clubs, Photography, Cooking",
-    gallery: true,
-  },
-];
 
 interface ChildProps {
   student: studentType;
@@ -69,6 +26,7 @@ const ExtracurricularActivities: React.FC<ChildProps> = ({
   student,
   fetchUser,
 }) => {
+  const [galleryData, setGalleryData] = useState<GalleryData | null>(null);
   const screens = useBreakpoint();
 
   const [open, setOpen] = useState(false);
@@ -79,6 +37,18 @@ const ExtracurricularActivities: React.FC<ChildProps> = ({
   const handleOpen = () => {
     setOpen(true);
   };
+
+  const [openGallery, setOpenGallery] = useState(false);
+
+  const handleCloseGallery = () => {
+    setOpenGallery(false);
+  };
+  const handleOpenGallery = (activity: GalleryData) => {
+    setOpenGallery(true);
+    setGalleryData(activity);
+  };
+
+  const hasActivities = student?.activities && student.activities.length > 0;
 
   return (
     <>
@@ -124,56 +94,105 @@ const ExtracurricularActivities: React.FC<ChildProps> = ({
           </Button>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {activities.map((activity, index) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {hasActivities ? (
+            student?.activities?.map((activity, index) => (
+              <Card
+                key={index}
+                style={{
+                  margin: 0,
+                  borderRadius: "8px",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                  width: "100%",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "16px",
+                    flexWrap: screens.xs ? "wrap" : "nowrap",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: screens.xs ? "column" : "row",
+                      gap: screens.xs ? "4px" : "16px",
+                      alignItems: screens.xs ? "flex-start" : "center",
+                      flex: 1,
+                    }}
+                  >
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "14px",
+                        minWidth: screens.xs ? "100%" : "120px",
+                      }}
+                    >
+                      {activity.category}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      {activity.skill}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      {activity.achievement}
+                    </Text>
+                  </div>
+
+                  <Button
+                    type="link"
+                    icon={<PictureOutlined style={{ color: "#4DC4FF" }} />}
+                    style={{
+                      padding: 0,
+                      height: "auto",
+                      whiteSpace: "nowrap",
+                      fontSize: "14px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                    onClick={() => {
+                      handleOpenGallery(activity);
+                    }}
+                  >
+                    {" "}
+                    Gallery
+                  </Button>
+                </div>
+              </Card>
+            ))
+          ) : (
             <Card
-              key={index}
               style={{
                 margin: 0,
                 borderRadius: "8px",
                 boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                width: "100%",
+                textAlign: "center",
               }}
             >
-              <Space
-                size="middle"
-                style={{
-                  minWidth: screens.xs ? "100%" : "160px",
-                  justifyContent: screens.xs ? "space-between" : "flex-start",
-                }}
-              >
-                {activity.icon}
-                <Text strong style={{ fontSize: screens.xs ? "14px" : "16px" }}>
-                  {activity.title}
-                </Text>
-              </Space>
-
-              <Text
-                style={{
-                  color: "#7C7D7E",
-                  flexGrow: 1,
-                  fontSize: screens.xs ? "13px" : "14px",
-                  margin: screens.xs ? "0 0 8px 0" : "0 16px",
-                }}
-              >
-                {activity.description}
-              </Text>
-
-              {activity.gallery && (
-                <Button
-                  type="link"
-                  icon={<PictureOutlined style={{ color: "#4DC4FF" }} />}
-                  style={{
-                    padding: 0,
-                    height: "auto",
-                    whiteSpace: "nowrap",
-                    fontSize: screens.xs ? "13px" : "14px",
-                  }}
-                >
-                  {screens.xs ? "View" : "Gallery"}
-                </Button>
-              )}
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <Text type="secondary">
+                    No extracurricular activities added
+                  </Text>
+                }
+              />
             </Card>
-          ))}
+          )}
         </div>
       </Card>
       <ExtraCurricularActivityDrawer
@@ -182,6 +201,11 @@ const ExtracurricularActivities: React.FC<ChildProps> = ({
         handleOpen={handleOpen}
         student={student}
         fetchUser={fetchUser}
+      />
+      <GalleryDrawer
+        open={openGallery}
+        onClose={handleCloseGallery}
+        datas={galleryData}
       />
     </>
   );
