@@ -11,12 +11,12 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
+      element: <Login />,
+    },
+    {
+      path: "/",
       element: <Index />,
       children: [
-        {
-          path: "",
-          element: <Login />,
-        },
         {
           path: "/student-form",
           element: <StudentForm />,

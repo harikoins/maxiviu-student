@@ -214,7 +214,9 @@ const ProjectDrawer: React.FC<ChildProps> = ({
       let projectFileFlag = null;
       let fileIndex = null;
 
-      if (project.certificate) {
+      console.log(project.certificate, "project.certificate");
+
+      if (project?.certificate) {
         projectFormData.append("files", project.certificate);
         projectFilePath = project?.certificate?.response?.path
           ? project.certificate.response.path.replace(/\\\\/g, "\\")
@@ -222,7 +224,9 @@ const ProjectDrawer: React.FC<ChildProps> = ({
         projectFileFlag = project?.certificate?.response?.filename
           ? project.certificate.response.filename
           : "";
-        fileIndex = projectFileIndex++;
+        if (!project?.certificate?.response) {
+          fileIndex = projectFileIndex++;
+        }
       } else if (project.projectFile?.projectPath) {
         projectFilePath = project.projectFile.projectPath;
         projectFileFlag = project.projectFile.projectPath;
@@ -237,7 +241,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
         student_id: student.id,
         projectFile: projectFileFlag,
         projectFilePath,
-        fileIndex,
+        fileIndex: fileIndex !== null ? fileIndex : undefined,
         id: project.id,
       };
     });
