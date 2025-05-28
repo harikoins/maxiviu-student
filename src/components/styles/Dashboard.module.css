@@ -1,56 +1,187 @@
-.card-paratext{
-    color: #9DA8B0;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom:5px ;
+.card-paratext {
+  color: #9da8b0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 5px;
 }
-.card-idno{
-    color: #9DA8B0;
-    font-size: small;
+.card-idno {
+  color: #9da8b0;
+  font-size: small;
 }
-.edit-pen-icon{
-    color: #3393FF;
+.edit-pen-icon {
+  color: #3393ff;
 }
-.card-inside-text{
-    color: #97A2AB;
+.card-inside-text {
+  color: #97a2ab;
 }
 
-.profile-card{
-    height: 80px !important;
+.profile-card {
+  height: 80px !important;
 }
 
 .cardWrapper {
-    border-radius: 12px;
-    background-color: #f9f9ff;
-    padding: 12px;
-    font-family: "Segoe UI", sans-serif;
+  border-radius: 12px;
+  background-color: #f9f9ff;
+  padding: 12px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.custom-thead {
+  --bs-table-border-color: #4b565b !important;
+  text-align: left;
+}
+
+.custom-thead th {
+  font-weight: 400;
+  background-color: #f8f9fa !important;
+}
+
+.custom-tbody tr td {
+  /* color: #4B565B !important; */
+}
+.custom-td {
+  color: #4b565b !important;
+}
+
+.custom-tbody tr {
+  text-align: left;
+}
+
+.custom-tbody span {
+  color: #4b565b !important;
+}
+
+.icon-hover {
+  transition: transform 0.2s ease;
+}
+
+.icon-hover:hover {
+  transform: translateY(-4px); /* Adjust upward movement as needed */
+  cursor: pointer;
+}
+
+
+.userCard {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.avatarCol {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+}
+
+@media (max-width: 576px) {
+  .avatar {
+    width: 120px;
+    height: 120px;
   }
+}
 
+.userName {
+  margin-bottom: 4px !important;
+  font-weight: 600;
+  color: #1d1d1d;
+}
 
-  .custom-thead {
+.userId {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
 
-    --bs-table-border-color:#4B565B !important;
-    text-align: left;
-  
-    }
+.userHeadline {
+  color: #555;
+  margin-bottom: 12px !important;
+  font-size: 0.95rem;
+}
 
-    .custom-thead th {
-        font-weight: 400;
-        background-color: #F8F9FA !important;
-      }
+.divider {
+  margin: 12px 0 !important;
+}
 
-      .custom-tbody tr td {
-        /* color: #4B565B !important; */
-        
-      }
-    .custom-td{
-        color: #4B565B !important;
-    }
+.infoItem {
+  font-size: 0.9rem;
+  color: #444;
+}
 
-      .custom-tbody tr{
-        text-align: left;
-      }
+.infoIcon {
+  color: #666;
+  font-size: 0.9rem;
+}
 
-      .custom-tbody span {
-        color: #4B565B !important;
-      }
+.websiteLink {
+  color: #1890ff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.websiteLink:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+.socialIcon {
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+  opacity: 0.8;
+}
+
+.socialIcon:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.editIcon {
+  font-size: 1.1rem;
+  color: #1890ff;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px;
+}
+
+.editIcon:hover {
+  color: #acadaf;
+}
+
+.verifiedBadge {
+  margin-bottom: 4px;
+}
+
+/* Skeleton styles */
+.skeletonTitle {
+  width: 60%;
+  height: 32px;
+  margin-bottom: 12px;
+}
+
+.skeletonSubtitle {
+  width: 40%;
+  height: 20px;
+  margin-bottom: 12px;
+}
+
+.skeletonTag {
+  width: 80px;
+  height: 24px;
+}
+
+@media (max-width: 576px) {
+  .skeletonTitle {
+    width: 80%;
+  }
+  .skeletonSubtitle {
+    width: 60%;
+  }
+}

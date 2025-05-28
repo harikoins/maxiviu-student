@@ -1,4 +1,10 @@
 import axios from "../config/axiosInstance";
+import type { softSkillType } from "./softskillsService";
+import type { technicalSkillType } from "./technicalskillService";
+import type { internshipType } from "./internshipService";
+import type { certificationType } from "./certificationService";
+import type { projectType } from "./projectService";
+import type { ActivityType } from "./extracurricularActivityService";
 
 interface userType {
   id: number;
@@ -39,13 +45,15 @@ export interface studentType {
   website: string;
   join_year: string;
   complete_year: string;
-  mygoal?: string;  // Made optional
+  mygoal?: string; // Made optional
   mystory?: string; // Made optional
   myachievement?: string; // Made optional
   profile_linkedin?: string;
   profile_behance?: string;
   profile_card?: string;
   profile_github?: string;
+  profile_reddit?: string;
+  dob?: string;
   pphoneno?: string;
   sphoneno?: string;
   college_id: number;
@@ -61,7 +69,13 @@ export interface studentType {
   department: DepartmentType;
   degree: DegreeType;
   course: CourseType;
-  documents:DocumentType[];
+  documents: DocumentType[];
+  internships: internshipType[];
+  softskills: softSkillType[];
+  technicalskills: technicalSkillType[];
+  certificates: certificationType[];
+  projects:projectType[];
+  activities:ActivityType[];
 }
 interface PaginatedResponse<T> {
   items: T[];

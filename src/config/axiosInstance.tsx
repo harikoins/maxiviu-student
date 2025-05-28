@@ -1,27 +1,27 @@
-import axios, { AxiosError, type AxiosResponse } from 'axios';
-  import { toast } from 'react-toastify';
+import axios, { AxiosError, type AxiosResponse } from "axios";
+import { toast } from "react-toastify";
 
 // Create an instance with default settings
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3900/', // Default base URL
+  baseURL: "http://localhost:3900/", // Default base URL
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Add an interceptor to handle common logic (e.g., authentication token)
 axiosInstance.interceptors.request.use(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (config:any) => {
+  (config: any) => {
     // Here, you can add authentication tokens, etc., if needed
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     return config;
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (error:any) => {
+  (error: any) => {
     return Promise.reject(error);
   }
 );
@@ -30,18 +30,40 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.status === 400 || error.status === 401 ) {
-     
-      const errors = ((error?.response) as AxiosResponse)?.data?.errors ?? "Server error contact admin!"
-        
-      // Display each error as a separate toast
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      errors.forEach((err:any) => {
+    const response = error?.response as AxiosResponse;
+    if (response?.status === 400 || response?.status === 401) {
+      const errorData =
+        response?.data?.errors ||
+        response?.data?.message ||
+        "Server error. Please contact admin.";
 
-          toast.error(` ${err}`);
-      });
-
-   //   toast.error(((error?.response) as AxiosResponse)?.data?.errors ?? "Server error contact admin!");
+      // Normalize and display errors
+      if (Array.isArray(errorData)) {
+        // Case: Array of errors
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        errorData.forEach((err: any) => {
+          toast.error(typeof err === "string" ? err : JSON.stringify(err));
+        });
+      } else if (typeof errorData === "string") {
+        // Case: Single string message
+        toast.error(errorData);
+      } else if (typeof errorData === "object") {
+        // Case: Object of errors (e.g., field-based)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Object.values(errorData).forEach((val: any) => {
+          if (Array.isArray(val)) {
+            val.forEach((msg) => toast.error(msg));
+          } else {
+            toast.error(val);
+          }
+        });
+      } else {
+        // Fallback
+        toast.error("Unexpected error format.");
+      }
+    } else {
+      // Handle other status codes (optional)
+      toast.error(response?.data?.message || "An unexpected error occurred.");
     }
     return Promise.reject(error);
   }

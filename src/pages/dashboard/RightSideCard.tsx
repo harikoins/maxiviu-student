@@ -1,39 +1,34 @@
 import React, { useState } from "react";
 import { Button, Card, Progress, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import ProjectDrawer from "./ProjectDrawer";
+import type { studentType } from "../../services/studentService";
 import DocumentDrawer from "./DocumentDrawer";
 
-const RightSideCards: React.FC = () => {
+interface ChildProps {
+  student: studentType;
+  fetchUser: () => void;
+}
+
+const RightSideCards: React.FC<ChildProps> = ({ student,fetchUser }) => {
   const [open, setOpen] = useState(false);
 
   const handleClose = () => {setOpen(false)};
   const handleOpen = () => {setOpen(true)};
 
+  const [openProject, setOpenProject] = useState(false);
+
+  const handleProjectClose = () => {
+    setOpenProject(false);
+  };
+  const handleProjectOpen = () => {
+    setOpenProject(true);
+  };
+
   const documents = [
     { name: "Resume", action: "View" },
     { name: "Marksheets", action: "View" },
     { name: "Professional Certifications", action: "Upload" },
-  ];
-
-  const projects = [
-    {
-      name: "Kofleetz",
-      description: "Software Innovation Suite",
-      action: "More",
-      image: "",
-    },
-    {
-      name: "RDD",
-      description: "Fitout Management",
-      action: "More",
-      image: "",
-    },
-    {
-      name: "Smart Coupon",
-      description: "Coupon Management",
-      action: "More",
-      image: "",
-    },
   ];
 
   const events = [
@@ -60,7 +55,6 @@ const RightSideCards: React.FC = () => {
   return (
     <>
       <Card
-        bordered={false}
         className="mb-4 rounded-4 mt-3"
         title={
           <div className="d-flex justify-content-between align-items-center">
@@ -82,12 +76,15 @@ const RightSideCards: React.FC = () => {
             <Typography.Title level={5} style={{ margin: 0 }}>
               Documents
             </Typography.Title>
-            <Button shape="circle" icon={<PlusOutlined />} onClick={()=>{
-              handleOpen();
-            }}/>
+            <Button
+              shape="circle"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                handleOpen();
+              }}
+            />
           </div>
         }
-        bordered={false}
         className="mt-3"
       >
         {documents.map((doc, index) => (
@@ -109,23 +106,26 @@ const RightSideCards: React.FC = () => {
             <Typography.Title level={5} style={{ margin: 0 }}>
               Projects & Innovations
             </Typography.Title>
-            <Button shape="circle" icon={<PlusOutlined />} />
+            <Button
+              shape="circle"
+              icon={<PlusOutlined />}
+              onClick={handleProjectOpen}
+            />
           </div>
         }
-        bordered={false}
         className="mt-3"
       >
-        {projects.map((project, index) => (
+        {student?.projects?.map((project, index) => (
           <div
             key={index}
             className="d-flex justify-content-between align-items-center border-bottom py-2"
           >
-            <Typography.Text>{project.name}</Typography.Text>
+            <Typography.Text>{project?.name}</Typography.Text>
             <Typography.Text type="secondary">
-              {project.description}
+              {project?.techskill}
             </Typography.Text>
-            <Button type="primary" shape="round">
-              {project.action}
+            <Button type="primary" shape="round" onClick={()=>{handleProjectOpen();}}>
+              More
             </Button>
           </div>
         ))}
@@ -140,7 +140,6 @@ const RightSideCards: React.FC = () => {
             Events/Campus
           </Typography.Title>
         }
-        bordered={false}
         className="mt-3"
       >
         {events.map((event, index) => (
@@ -164,7 +163,15 @@ const RightSideCards: React.FC = () => {
           Show more
         </Typography.Link>
       </Card>
-      <DocumentDrawer open={open} handleClose={handleClose} handleOpen={handleOpen}/>
+      <DocumentDrawer open={open} handleClose={handleClose} handleOpen={handleOpen} student={student}/>
+
+      <ProjectDrawer
+        openProject={openProject}
+        handleProjectClose={handleProjectClose}
+        handleProjectOpen={handleProjectOpen}
+        student={student}
+        fetchUser={fetchUser}
+      />
     </>
   );
 };

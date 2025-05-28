@@ -1,77 +1,213 @@
-import React from "react";
-import { Button, Card, Space, Typography } from "antd";
-import { PictureOutlined, TeamOutlined, BookOutlined, StarOutlined, SettingOutlined, TrophyOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Button, Card, Typography, Grid, Empty } from "antd";
+import { PictureOutlined } from "@ant-design/icons";
+import ExtraCurricularActivityDrawer from "./ExtraCurricularActivityDrawer";
+import type { studentType } from "../../services/studentService";
+import GalleryDrawer from "./Gallery";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
-interface Activity {
-  icon: React.ReactNode;
-  title: string;
+interface GalleryData {
+  category: string;
+  skill: string;
+  achievement: string;
   description: string;
-  gallery: boolean;
+  filename: string;
+  filePath: string;
 }
 
-const activities: Activity[] = [
-  {
-    icon: <TrophyOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Sports",
-    description: "Football, Cricket, Athletics",
-    gallery: true,
-  },
-  {
-    icon: <StarOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Art and Creativity",
-    description: "Painting, Theatre, Piano",
-    gallery: true,
-  },
-  {
-    icon: <BookOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Academic & Intellectual Pursuits",
-    description: "Robotics Club, Math Olympiads",
-    gallery: true,
-  },
-  {
-    icon: <SettingOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Technology & STEM Activities",
-    description: "Hackathon, Gaming and esports",
-    gallery: false,
-  },
-  {
-    icon: <TeamOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Community Service & Leadership",
-    description: "Volunteering, Social Awareness Campaigns",
-    gallery: false,
-  },
-  {
-    icon: <StarOutlined style={{ fontSize: 24, color: "#7C7D7E" }} />,
-    title: "Hobbies & Special Interests",
-    description: "Book Clubs, Photography, Cooking",
-    gallery: true,
-  },
-];
+interface ChildProps {
+  student: studentType;
+  fetchUser: () => void;
+}
 
-const ExtracurricularActivities: React.FC = () => {
+const ExtracurricularActivities: React.FC<ChildProps> = ({
+  student,
+  fetchUser,
+}) => {
+  const [galleryData, setGalleryData] = useState<GalleryData | null>(null);
+  const screens = useBreakpoint();
+
+  const [open, setOpen] = useState(false);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const [openGallery, setOpenGallery] = useState(false);
+
+  const handleCloseGallery = () => {
+    setOpenGallery(false);
+  };
+  const handleOpenGallery = (activity: GalleryData) => {
+    setOpenGallery(true);
+    setGalleryData(activity);
+  };
+
+  const hasActivities = student?.activities && student.activities.length > 0;
+
   return (
-    <Card style={{ backgroundColor: "#F8F9FA", borderRadius: "12px", padding: "16px" }}>
-      <Space style={{ justifyContent: "space-between", width: "100%" }}>
-        <Title level={4}>Extracurricular Activities</Title>
-        <Button type="primary" shape="round" style={{ backgroundColor: "#4DC4FF", borderColor: "#4DC4FF" }}>
-          Add More
-        </Button>
-      </Space>
-      {activities.map((activity, index) => (
-        <Card key={index} style={{ margin: "8px 0", borderRadius: "8px" }} bodyStyle={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Space size="large">
-            {activity.icon}
-            <span style={{ fontWeight: 600 }}>{activity.title}</span>
-          </Space>
-          <span style={{ flexGrow: 1, margin: "0 16px", color: "#7C7D7E" }}>{activity.description}</span>
-          {activity.gallery && (
-            <Button type="link" icon={<PictureOutlined style={{ color: "#4DC4FF" }} />}>Gallery</Button>
+    <>
+      <Card
+        style={{
+          backgroundColor: "#F8F9FA",
+          borderRadius: "12px",
+          padding: screens.xs ? "12px" : "16px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: screens.xs ? "column" : "row",
+            justifyContent: "space-between",
+            alignItems: screens.xs ? "flex-start" : "center",
+            marginBottom: "16px",
+            gap: screens.xs ? "12px" : 0,
+          }}
+        >
+          <Title
+            level={4}
+            style={{
+              margin: 0,
+              fontSize: screens.xs ? "18px" : "20px",
+            }}
+          >
+            Extracurricular Activities
+          </Title>
+          <Button
+            type="primary"
+            shape="round"
+            style={{
+              backgroundColor: "#4DC4FF",
+              borderColor: "#4DC4FF",
+              fontSize: screens.xs ? "12px" : "14px",
+              height: screens.xs ? "32px" : "auto",
+            }}
+            onClick={handleOpen}
+          >
+            Add More
+          </Button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {hasActivities ? (
+            student?.activities?.map((activity, index) => (
+              <Card
+                key={index}
+                style={{
+                  margin: 0,
+                  borderRadius: "8px",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                  width: "100%",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "16px",
+                    flexWrap: screens.xs ? "wrap" : "nowrap",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: screens.xs ? "column" : "row",
+                      gap: screens.xs ? "4px" : "16px",
+                      alignItems: screens.xs ? "flex-start" : "center",
+                      flex: 1,
+                    }}
+                  >
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "14px",
+                        minWidth: screens.xs ? "100%" : "120px",
+                      }}
+                    >
+                      {activity.category}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      {activity.skill}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      {activity.achievement}
+                    </Text>
+                  </div>
+
+                  <Button
+                    type="link"
+                    icon={<PictureOutlined style={{ color: "#4DC4FF" }} />}
+                    style={{
+                      padding: 0,
+                      height: "auto",
+                      whiteSpace: "nowrap",
+                      fontSize: "14px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                    onClick={() => {
+                      handleOpenGallery(activity);
+                    }}
+                  >
+                    {" "}
+                    Gallery
+                  </Button>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <Card
+              style={{
+                margin: 0,
+                borderRadius: "8px",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                width: "100%",
+                textAlign: "center",
+              }}
+            >
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <Text type="secondary">
+                    No extracurricular activities added
+                  </Text>
+                }
+              />
+            </Card>
           )}
-        </Card>
-      ))}
-    </Card>
+        </div>
+      </Card>
+      <ExtraCurricularActivityDrawer
+        open={open}
+        handleClose={handleClose}
+        handleOpen={handleOpen}
+        student={student}
+        fetchUser={fetchUser}
+      />
+      <GalleryDrawer
+        open={openGallery}
+        onClose={handleCloseGallery}
+        datas={galleryData}
+      />
+    </>
   );
 };
 

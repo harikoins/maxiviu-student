@@ -13,7 +13,6 @@ import {
   Modal,
 } from "antd";
 import {
-  PlusOutlined,
   UploadOutlined,
   SaveOutlined,
   ArrowLeftOutlined,
@@ -24,8 +23,8 @@ import {
 import type { UploadProps } from "antd";
 import { createdocument } from "../../services/documentService";
 import { showSuccessToast, showErrorToast } from "../../utils/toaster";
-import { userDatas } from "../../stores/userStore";
-import config from "../../config/config";
+import type { studentType } from "../../services/studentService";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title, Text } = Typography;
 
@@ -33,6 +32,7 @@ interface DrawerType {
   open: boolean;
   handleClose: () => void;
   handleOpen: () => void;
+  student: studentType;
 }
 
 interface DocumentItem {
@@ -45,7 +45,7 @@ interface DocumentItem {
 const DocumentDrawer: React.FC<DrawerType> = ({
   open,
   handleClose,
-  handleOpen,
+  student,
 }) => {
   const [marksheets, setMarksheets] = useState<DocumentItem[]>([]);
 
@@ -72,17 +72,6 @@ const DocumentDrawer: React.FC<DrawerType> = ({
     }
   };
 
-  // const fetchDocumentFile = async (
-  //   documentpath: string,
-  //   filename: string
-  // ): Promise<File> => {
-  //    console.log(documentpath,"documentpath")
-  //   const response = await fetch(documentpath);
-  //   console.log(response,"responsenew")
-  //   const blob = await response.blob();
-  //   return new File([blob], filename, { type: blob.type });
-  // };
-
   const fetchDocumentFile = async (
     documentpath: string,
     filename: string
@@ -91,7 +80,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
       // Construct the complete URL
       const completeUrl = documentpath.startsWith("http")
         ? documentpath
-        : `${config.backendUrl}/${documentpath}`;
+        : `${apiUrl}/${documentpath}`;
 
       const response = await fetch(completeUrl, {
         method: "GET",
@@ -115,10 +104,10 @@ const DocumentDrawer: React.FC<DrawerType> = ({
 
   useEffect(() => {
     const loadDocuments = async () => {
-      if (userDatas?.value?.documents) {
+      if (student?.documents) {
         try {
           // Process resume
-          const userResume = userDatas.value.documents.find(
+          const userResume = student?.documents.find(
             (doc) => doc.type === "Resume"
           );
           if (userResume) {
@@ -135,7 +124,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
           }
 
           // Process marksheets
-          const userMarksheets = userDatas.value.documents.filter(
+          const userMarksheets = student?.documents.filter(
             (doc) => doc.type === "Marksheet"
           );
           const marksheetItems = await Promise.all(
@@ -154,7 +143,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
           setMarksheets(marksheetItems);
 
           // Process certificates
-          const userCertificates = userDatas.value.documents.filter(
+          const userCertificates = student?.documents.filter(
             (doc) => doc.type === "Certification"
           );
           const certificateItems = await Promise.all(
@@ -179,7 +168,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
     };
 
     loadDocuments();
-  }, [userDatas.value]);
+  }, [student]);
 
   const handleUpload = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -273,18 +262,9 @@ const DocumentDrawer: React.FC<DrawerType> = ({
 
     const formData = new FormData();
 
-    const maxiviuData = localStorage.getItem("komaxiviustudent");
-    let student_id = "";
-    if (maxiviuData) {
-      try {
-        const parsedData = JSON.parse(maxiviuData);
-        student_id = parsedData.studentid || "";
-      } catch (error) {
-        console.error("Failed to parse maxiviu data from localStorage", error);
-      }
+    if (student.id) {
+      formData.append("student_id", String(student.id));
     }
-
-    formData.append("student_id", student_id);
 
     if (resume) {
       formData.append("resume_name", resume.name);
@@ -323,19 +303,14 @@ const DocumentDrawer: React.FC<DrawerType> = ({
       handleClose();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.log(error,"error")
       showErrorToast("Error uploading documents");
     }
   };
 
   return (
     <>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => handleOpen()}
-      >
-        Open Drawer
-      </Button>
+     
       <Drawer
         title={
           <Space>
