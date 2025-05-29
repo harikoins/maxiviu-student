@@ -75,22 +75,22 @@ const ProjectDrawer: React.FC<ChildProps> = ({
           techskill: project.techskill || "",
           status: project.status || "",
           duration: project.duration || "",
-          sourcecodelink: project.sourcecodelink || "",
-          certificate: project.projectPath
+          sourcecodelink: project?.sourcecodelink || "",
+          certificate: project?.projectPath
             ? {
                 uid: `-${project.id}`,
                 name:
                   project.filename ||
-                  project.projectPath.split(/[\\/]/).pop() ||
+                  project.projectPath?.split(/[\\/]/).pop() ||
                   "certificate",
                 status: "done" as const,
-                url: `${apiUrl}/${project.projectPath
+                url: `${apiUrl}/${project?.projectPath
                   .replace(/\\/g, "/")
                   .replace(/^\/+/, "")}`,
                 originFileObj: undefined,
                 response: {
-                  path: project.projectPath,
-                  filename: project.filename,
+                  path: project?.projectPath,
+                  filename: project?.filename,
                 },
               }
             : undefined,
@@ -214,7 +214,6 @@ const ProjectDrawer: React.FC<ChildProps> = ({
       let projectFileFlag = null;
       let fileIndex = null;
 
-      console.log(project.certificate, "project.certificate");
 
       if (project?.certificate) {
         projectFormData.append("files", project.certificate);
@@ -228,8 +227,8 @@ const ProjectDrawer: React.FC<ChildProps> = ({
           fileIndex = projectFileIndex++;
         }
       } else if (project.projectFile?.projectPath) {
-        projectFilePath = project.projectFile.projectPath;
-        projectFileFlag = project.projectFile.projectPath;
+        projectFilePath = project?.projectFile?.projectPath;
+        projectFileFlag = project?.projectFile?.projectPath;
       }
 
       return {

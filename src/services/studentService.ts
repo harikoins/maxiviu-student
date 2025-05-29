@@ -12,20 +12,11 @@ interface userType {
   name: string;
 }
 
-interface DepartmentType {
+interface CommonType {
   id: number;
   name: string;
 }
 
-interface DegreeType {
-  id: number;
-  name: string;
-}
-
-interface CourseType {
-  id: number;
-  name: string;
-}
 
 interface DocumentType {
   id: number;
@@ -60,15 +51,15 @@ export interface studentType {
   user_id: number;
   department_id: number;
   degree_id: number;
-  city_id: number;
+  city: string;
   state_id: number;
   country_id: number;
   course_id: number;
   status: number;
   user: userType;
-  department: DepartmentType;
-  degree: DegreeType;
-  course: CourseType;
+  department: CommonType;
+  degree: CommonType;
+  course: CommonType;
   documents: DocumentType[];
   internships: internshipType[];
   softskills: softSkillType[];
@@ -76,6 +67,8 @@ export interface studentType {
   certificates: certificationType[];
   projects:projectType[];
   activities:ActivityType[];
+  country:CommonType;
+  state:CommonType;
 }
 interface PaginatedResponse<T> {
   items: T[];
