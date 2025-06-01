@@ -26,10 +26,11 @@ export const getdocumentPage = async (
   };
 };
 
-export const createdocument = async (data: FormData): Promise<documentType> => {
+export const createdocument = async (data: FormData,uploadPath: string): Promise<documentType> => {
   const res = await axios.post("/documents", data, {
     headers: {
       "Content-Type": "multipart/form-data",
+      "upload-path": uploadPath,
     },
   });
   return res.data;

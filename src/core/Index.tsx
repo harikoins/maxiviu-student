@@ -72,7 +72,7 @@ const App: React.FC = () => {
             style={{ textDecoration: "none", color: "#ffff" }}
           >
             <Space>
-              Ramesh
+              Sundresh
               <Avatar
                 size="large"
                 icon={<UserOutlined />}

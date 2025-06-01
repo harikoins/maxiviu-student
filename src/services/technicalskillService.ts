@@ -46,7 +46,7 @@ export const createBulkTechnicalSkill = async (data: {
   technicalSkillDatas: Omit<technicalSkillType, "id">[];
   student_id: number;
 }): Promise<{ success: boolean; data: technicalSkillType[] }> => {
-  const res = await axios.post("/technicalskill/bulk-create", data);
+  const res = await axios.post("/technicalskills/bulk-create", data);
   return res.data;
 };
 
@@ -54,17 +54,17 @@ export const updateTechnicalSkill = async (
   id: number,
   data: Omit<technicalSkillType, "id">
 ): Promise<technicalSkillType> => {
-  const res = await axios.put(`/technicalskill/${id}`, data);
+  const res = await axios.put(`/technicalskills/${id}`, data);
   return res.data;
 };
 
 export const deleteTechnicalSkill = async (id: number): Promise<void> => {
-  await axios.delete(`/technicalskill/${id}`);
+  await axios.delete(`/technicalskills/${id}`);
 };
 
 export const getTechnicalSkill = async (
   id: number
 ): Promise<technicalSkillType> => {
-  const res = await axios.get(`/technicalskill/${id}`);
+  const res = await axios.get(`/technicalskills/${id}`);
   return res.data;
 };

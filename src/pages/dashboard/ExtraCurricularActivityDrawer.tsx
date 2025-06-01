@@ -281,7 +281,7 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
     activityFormData.append("activityDatas", JSON.stringify(activityDatas));
     activityFormData.append("student_id", student.id.toString());
 
-    await createBulkExtracurricularActivity(activityFormData);
+    await createBulkExtracurricularActivity(activityFormData,`uploads/${student.firstname} ${student.lastname}/extracurricularactivities`);
 
     console.log(activityDatas, "activityDatas");
     await fetchUser();

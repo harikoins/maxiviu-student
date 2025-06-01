@@ -248,7 +248,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
     projectFormData.append("projectDatas", JSON.stringify(projectDatas));
     projectFormData.append("student_id", student.id.toString());
 
-    await createBulkProject(projectFormData);
+    await createBulkProject(projectFormData,`uploads/${student.firstname} ${student.lastname}/projects`);
     await fetchUser();
     showSuccessToast("All projects submitted successfully!");
     handleProjectClose();

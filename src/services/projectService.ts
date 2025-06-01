@@ -8,8 +8,8 @@ export interface projectType {
   status: string;
   duration: string;
   sourcecodelink: string;
-  filename:string;
-  projectPath:string;
+  filename: string;
+  projectPath: string;
 }
 interface PaginatedResponse<T> {
   items: T[];
@@ -22,9 +22,7 @@ export const getProjectsPage = async (
   search = ""
 ): Promise<PaginatedResponse<projectType>> => {
   const res = await axios.get(
-    `/projects?page=${page}&limit=${limit}&search=${encodeURIComponent(
-      search
-    )}`
+    `/projects?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
   );
   return {
     items: res.data.data,
@@ -32,9 +30,7 @@ export const getProjectsPage = async (
   };
 };
 
-export const createProject = async (
-  data: FormData
-): Promise<projectType> => {
+export const createProject = async (data: FormData): Promise<projectType> => {
   const res = await axios.post("/projects", data, {
     headers: {
       "Content-Type": "multipart/form-data",
@@ -44,11 +40,13 @@ export const createProject = async (
 };
 
 export const createBulkProject = async (
-  formData: FormData
+  formData: FormData,
+  uploadPath: string
 ): Promise<{ success: boolean; data: projectType[] }> => {
   const res = await axios.post("/projects/bulk-create", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
+      "upload-path": uploadPath,
     },
   });
   return res.data;
@@ -66,9 +64,7 @@ export const deleteProject = async (id: number): Promise<void> => {
   await axios.delete(`/projects/${id}`);
 };
 
-export const getProject = async (
-  id: number
-): Promise<projectType> => {
+export const getProject = async (id: number): Promise<projectType> => {
   const res = await axios.get(`/projects/${id}`);
   return res.data;
 };

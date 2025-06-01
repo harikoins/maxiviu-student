@@ -16,9 +16,7 @@ import {
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { studentType } from "../../services/studentService";
 import { showSuccessToast, showErrorToast } from "../../utils/toaster";
-import {
-  createBulkInternship
-} from "../../services/internshipService";
+import { createBulkInternship } from "../../services/internshipService";
 import {
   createBulkSoftSkill,
   type softSkillType,
@@ -177,7 +175,12 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
         JSON.stringify(internshipDatas)
       );
       internshipFormData.append("student_id", student.id.toString());
-      requests.push(createBulkInternship(internshipFormData));
+      requests.push(
+        createBulkInternship(
+          internshipFormData,
+          `uploads/${student.firstname} ${student.lastname}/internships`
+        )
+      );
 
       // Handle Soft Skills
       const softSkillsData = softSkills.map((item: softSkillType) => ({
@@ -252,7 +255,12 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
         JSON.stringify(certificationDatas)
       );
       certificationFormData.append("student_id", student.id.toString());
-      requests.push(createBulkCertificate(certificationFormData));
+      requests.push(
+        createBulkCertificate(
+          certificationFormData,
+          `uploads/${student.firstname} ${student.lastname}/certificates`
+        )
+      );
 
       // Execute all requests
       const responses = await Promise.all(requests);
@@ -411,7 +419,9 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
             {...restField}
             name={[name, "skill"]}
             label={isMobile ? "Skill" : undefined}
-            rules={[{ required: true, message: "Required" }]}
+            rules={[
+              { required: true, message: "Required" },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -1152,7 +1162,9 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   gap: "8px",
                 }}
               >
-                <div style={{ fontWeight: 600,fontSize:'1.3rem' }}>Technical Skills</div>
+                <div style={{ fontWeight: 600, fontSize: "1.3rem" }}>
+                  Technical Skills
+                </div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -1180,7 +1192,9 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   marginTop: 24,
                 }}
               >
-                <div style={{ fontWeight: 600 ,fontSize:'1.3rem'}}>Soft Skills</div>
+                <div style={{ fontWeight: 600, fontSize: "1.3rem" }}>
+                  Soft Skills
+                </div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -1208,7 +1222,9 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   marginTop: 24,
                 }}
               >
-                <div style={{ fontWeight: 600 ,fontSize:'1.3rem'}}>Internships</div>
+                <div style={{ fontWeight: 600, fontSize: "1.3rem" }}>
+                  Internships
+                </div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -1236,7 +1252,9 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
                   marginTop: 24,
                 }}
               >
-                <div style={{ fontWeight: 600,fontSize:'1.3rem' }}>Certifications</div>
+                <div style={{ fontWeight: 600, fontSize: "1.3rem" }}>
+                  Certifications
+                </div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}

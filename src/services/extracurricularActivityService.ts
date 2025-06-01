@@ -43,11 +43,13 @@ export const createExtracurricularActivity = async (
 };
 
 export const createBulkExtracurricularActivity = async (
-  formData: FormData
+  formData: FormData,
+  uploadPath: string
 ): Promise<{ success: boolean; data: ActivityType[] }> => {
   const res = await axios.post("/extracurricularactivities/bulk-create", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
+      "upload-path": uploadPath,
     },
   });
   return res.data;

@@ -23,7 +23,7 @@ export const getInternshipPage = async (
   search = ""
 ): Promise<PaginatedResponse<internshipType>> => {
   const res = await axios.get(
-    `/intenships?page=${page}&limit=${limit}&search=${encodeURIComponent(
+    `/internships?page=${page}&limit=${limit}&search=${encodeURIComponent(
       search
     )}`
   );
@@ -36,7 +36,7 @@ export const getInternshipPage = async (
 export const createInternship = async (
   data: FormData
 ): Promise<internshipType> => {
-  const res = await axios.post("/intenships", data, {
+  const res = await axios.post("/internships", data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -44,20 +44,14 @@ export const createInternship = async (
   return res.data;
 };
 
-// export const createBulkInternship = async (data: {
-//   internshipDatas: Omit<internshipType, "id">[];
-//   student_id: number;
-// }): Promise<{ success: boolean; data: internshipType[] }> => {
-//   const res = await axios.post("/intenships/bulk-create", data);
-//   return res.data;
-// };
-
 export const createBulkInternship = async (
-  formData: FormData
+  formData: FormData,
+  uploadPath: string
 ): Promise<{ success: boolean; data: internshipType[] }> => {
-  const res = await axios.post("/intenships/bulk-create", formData, {
+  const res = await axios.post("/internships/bulk-create", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
+      "upload-path": uploadPath,
     },
   });
   return res.data;
@@ -67,15 +61,15 @@ export const updateInternship = async (
   id: number,
   data: Omit<internshipType, "id">
 ): Promise<internshipType> => {
-  const res = await axios.put(`/intenships/${id}`, data);
+  const res = await axios.put(`/internships/${id}`, data);
   return res.data;
 };
 
 export const deleteInternship = async (id: number): Promise<void> => {
-  await axios.delete(`/intenships/${id}`);
+  await axios.delete(`/internships/${id}`);
 };
 
 export const getInternship = async (id: number): Promise<internshipType> => {
-  const res = await axios.get(`/intenships/${id}`);
+  const res = await axios.get(`/internships/${id}`);
   return res.data;
 };

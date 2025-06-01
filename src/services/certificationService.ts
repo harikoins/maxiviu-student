@@ -43,11 +43,13 @@ export const createCertificate = async (
 };
 
 export const createBulkCertificate = async (
-  formData: FormData
+  formData: FormData,
+  uploadPath: string
 ): Promise<{ success: boolean; data: certificationType[] }> => {
   const res = await axios.post("/certificates/bulk-create", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
+      "upload-path": uploadPath,
     },
   });
   return res.data;

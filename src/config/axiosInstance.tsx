@@ -1,9 +1,9 @@
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { toast } from "react-toastify";
-
+import type { userType } from "../services/userService";
 // Create an instance with default settings
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3900/", // Default base URL
+  baseURL: "http://localhost:3900/v1/student/", // Default base URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -14,9 +14,12 @@ axiosInstance.interceptors.request.use(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (config: any) => {
     // Here, you can add authentication tokens, etc., if needed
-    const token = localStorage.getItem("authToken");
+    const stored= localStorage.getItem("komaxiviustudent");
+    const token: userType | null = stored ? JSON.parse(stored) as userType : null;
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+
+
+      config.headers["Authorization"] = `Bearer ${token.accessToken}`;
     }
     return config;
   },

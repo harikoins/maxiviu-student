@@ -10,7 +10,6 @@ import {
   Divider,
   List,
   Tag,
-  Modal,
 } from "antd";
 import {
   UploadOutlined,
@@ -55,8 +54,6 @@ const DocumentDrawer: React.FC<DrawerType> = ({
 
   const [newMarksheet, setNewMarksheet] = useState<string>("");
   const [newCertificate, setNewCertificate] = useState<string>("");
-  const [previewVisible, setPreviewVisible] = useState(false);
-  const [previewFile, setPreviewFile] = useState<File | null>(null);
 
   const addMarksheet = () => {
     if (newMarksheet.trim()) {
@@ -233,16 +230,21 @@ const DocumentDrawer: React.FC<DrawerType> = ({
   };
 
   const handlePreview = async (item: DocumentItem) => {
-    try {
-      if (item.file) {
-        setPreviewFile(item.file);
-        setPreviewVisible(true);
-      }
-    } catch (error) {
-      console.error("Error previewing file:", error);
-      showErrorToast("Failed to preview file");
+  console.log(item.file, "item.file");
+
+  try {
+    if (item.file) {
+      const fileURL = typeof item.file === "string" ? item.file : URL.createObjectURL(item.file);
+      window.open(fileURL, "_blank", "noopener,noreferrer");
+    } else {
+      showErrorToast("File not available for preview");
     }
-  };
+  } catch (error) {
+    console.error("Error previewing file:", error);
+    showErrorToast("Failed to preview file");
+  }
+};
+
   const props: UploadProps = {
     beforeUpload: () => false,
     maxCount: 1,
@@ -298,19 +300,18 @@ const DocumentDrawer: React.FC<DrawerType> = ({
     });
 
     try {
-      await createdocument(formData);
+      await createdocument(formData,`uploads/${student.firstname} ${student.lastname}/documents`);
       showSuccessToast("Documents uploaded successfully");
       handleClose();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.log(error,"error")
+      console.log(error, "error");
       showErrorToast("Error uploading documents");
     }
   };
 
   return (
     <>
-     
       <Drawer
         title={
           <Space>
@@ -537,23 +538,6 @@ const DocumentDrawer: React.FC<DrawerType> = ({
             Save
           </Button>
         </Form>
-
-        {/* File Preview Modal */}
-        <Modal
-          open={previewVisible}
-          title="File Preview"
-          footer={null}
-          onCancel={() => setPreviewVisible(false)}
-          width="80%"
-        >
-          {previewFile && (
-            <iframe
-              title="file-preview"
-              src={URL.createObjectURL(previewFile)}
-              style={{ width: "100%", height: "500px", border: "none" }}
-            />
-          )}
-        </Modal>
       </Drawer>
     </>
   );
