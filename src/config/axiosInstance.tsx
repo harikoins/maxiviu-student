@@ -13,10 +13,14 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (config: any) => {
+    console.log("Interceptor triggered");
     // Here, you can add authentication tokens, etc., if needed
-    const token = localStorage.getItem("authToken");
+    // const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("komaxiviustudent");
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      const parsed = JSON.parse(token);
+      const tok = parsed.accessToken;
+      config.headers["Authorization"] = `Bearer ${tok}`;
     }
     return config;
   },
