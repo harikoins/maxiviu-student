@@ -1,4 +1,5 @@
 import axios from "../config/axiosInstance";
+import type { ChangePasswordFormData } from "../core/Changepasword";
 
 export interface userType {
   id: number;
@@ -61,4 +62,9 @@ export const updateUser = async (
 
 export const deleteUser = async (id: number): Promise<void> => {
   await axios.delete(`/users/${id}`);
+};
+
+export const changePassword = async (data : ChangePasswordFormData): Promise<{ message: string }> => {
+  const res = await axios.put(`/users/changepassword`, data);
+  return res.data;
 };
