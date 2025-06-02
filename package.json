@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "env-cmd -e development vite",
+    "dev": "env-cmd -e development vite --host",
     "build": "tsc -b && env-cmd -e production build",
     "lint": "eslint .",
     "preview": "vite preview"

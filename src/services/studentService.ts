@@ -15,8 +15,8 @@ interface userType {
 interface CommonType {
   id: number;
   name: string;
+  iso2: string;
 }
-
 
 interface DocumentType {
   id: number;
@@ -65,10 +65,10 @@ export interface studentType {
   softskills: softSkillType[];
   technicalskills: technicalSkillType[];
   certificates: certificationType[];
-  projects:projectType[];
-  activities:ActivityType[];
-  country:CommonType;
-  state:CommonType;
+  projects: projectType[];
+  activities: ActivityType[];
+  country: CommonType;
+  state: CommonType;
 }
 interface PaginatedResponse<T> {
   items: T[];
@@ -94,6 +94,24 @@ export const createstudent = async (
 ): Promise<studentType> => {
   const res = await axios.post("/students", data);
   return res.data;
+};
+
+export const uploadProfileImage = async (
+  studentId: number,
+  formData: FormData,
+  uploadPath: string
+) => {
+  const response = await axios.post(
+    `/students/${studentId}/profile-image`,
+    formData,
+    {
+      headers: {
+        "upload-path": uploadPath,
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return response.data;
 };
 
 export const updatestudent = async (

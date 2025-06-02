@@ -11,6 +11,10 @@ import {
   Row,
   Col,
   Select,
+  Upload,
+  Avatar,
+  message,
+  Flex,
 } from "antd";
 import {
   SaveOutlined,
@@ -19,14 +23,21 @@ import {
   LinkedinOutlined,
   RedditOutlined,
   BehanceOutlined,
+  UploadOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import type { studentType } from "../../services/studentService";
-import { updatestudent } from "../../services/studentService";
+import {
+  updatestudent,
+  uploadProfileImage,
+} from "../../services/studentService";
 import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 import type { countryType, stateType } from "../../services/countryService";
 import { getCountryPage } from "../../services/countryService";
+import type { UploadChangeParam, RcFile } from "antd/es/upload";
+const apiUrl = import.meta.env.VITE_API_URL;
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
 interface dropdownType {
@@ -51,6 +62,55 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+
+  const [imageUrl, setImageUrl] = useState<string>();
+  const [uploading, setUploading] = useState(false);
+
+  const beforeUpload = (file: RcFile) => {
+    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+    if (!isJpgOrPng) {
+      message.error("You can only upload JPG/PNG files!");
+    }
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error("Image must be smaller than 5MB!");
+    }
+    return isJpgOrPng && isLt5M;
+  };
+
+  const handleImageUpload = async (file: RcFile) => {
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Call your upload service
+      const response = await uploadProfileImage(
+        student.id,
+        formData,
+        `uploads/${student.firstname} ${student.lastname}/profile`
+      );
+      console.log(response, "response");
+      setImageUrl(response.imageUrl);
+      message.success("Profile image uploaded successfully");
+      return response.imageUrl;
+    } catch (error) {
+      message.error("Failed to upload profile image");
+      throw error;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleChange = (info: UploadChangeParam) => {
+    if (info.file.status === "uploading") {
+      setUploading(true);
+      return;
+    }
+    if (info.file.status === "done") {
+      setUploading(false);
+    }
+  };
 
   const [dropdown, setDropdown] = useState<dropdownType>({
     countries: { options: [], selectedValue: null },
@@ -134,6 +194,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       profile_behance: student?.profile_behance || "",
       profile_github: student?.profile_github || "",
       profile_reddit: student?.profile_reddit || "",
+      profile_card: student?.profile_card || null,
     };
   };
 
@@ -143,6 +204,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       ...values,
       country_id: Number(values.country),
       state_id: Number(values.state),
+      profile_card: imageUrl || student?.profile_card,
     };
     try {
       await updatestudent(student.id, payload);
@@ -157,6 +219,13 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     }
   };
 
+  const uploadButton = (
+    <div>
+      {uploading ? <UserOutlined /> : <UploadOutlined />}
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </div>
+  );
+
   return (
     <Drawer
       title={
@@ -164,7 +233,6 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           <Title level={4} style={{ marginBottom: 0 }}>
             Profile
           </Title>
-          <Text type="secondary">ID No: ANUS9603</Text>
         </Space>
       }
       width={600}
@@ -193,6 +261,43 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
         onFinish={onFinish}
       >
         <Row gutter={16}>
+          <Col span={24}>
+            <Flex justify="center" align="center">
+              <Form.Item name="profile_card" label="Profile Image">
+                <Upload
+                  name="avatar"
+                  accept=".png,.jpg,.jpeg"
+                  listType="picture-circle"
+                  className="avatar-uploader"
+                  showUploadList={false}
+                  beforeUpload={beforeUpload}
+                  customRequest={async ({ file, onSuccess, onError }) => {
+                    try {
+                      const url = await handleImageUpload(file as RcFile);
+                      if (onSuccess) onSuccess(url);
+                    } catch (error) {
+                      if (onError) onError(error as Error);
+                    }
+                  }}
+                  onChange={handleChange}
+                >
+                  {imageUrl || student?.profile_card ? (
+                    <Avatar
+                      src={
+                        imageUrl
+                          ? `${apiUrl}${imageUrl}`
+                          : `${apiUrl}${student.profile_card}`
+                      }
+                      alt="avatar"
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  ) : (
+                    uploadButton
+                  )}
+                </Upload>
+              </Form.Item>
+            </Flex>
+          </Col>
           <Col span={12}>
             <Form.Item
               name="firstname"

@@ -75,11 +75,10 @@
 }
 
 .avatar {
-  width: 150px;
-  height: 150px;
+  width: 120px !important;
+  height: 120px !important;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #f0f0f0;
 }
 
 @media (max-width: 576px) {

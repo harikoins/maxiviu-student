@@ -9,6 +9,7 @@ import {
   Skeleton,
   Flex,
   Divider,
+  Avatar,
 } from "antd";
 import {
   EditOutlined,
@@ -18,7 +19,6 @@ import {
   BankOutlined,
   BookOutlined,
 } from "@ant-design/icons";
-import ProfImg from "../../assets/Dashboard/profile.jpg";
 import Github from "../../assets/Dashboard/github.png";
 import Reddit from "../../assets/Dashboard/reddit.png";
 import Be from "../../assets/Dashboard/social.png";
@@ -28,6 +28,8 @@ import styles from "../../components/styles/Dashboard.module.css";
 import type { studentType } from "../../services/studentService";
 import dayjs from "dayjs";
 import ProfileDrawer from "./ProfileDrawer";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -65,12 +67,25 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
         ) : (
           <Row gutter={[24, 16]} align="middle">
             <Col xs={24} sm={8} md={6} className={styles.avatarCol}>
-              <Image
-                src={ProfImg}
-                alt="Profile"
-                preview={false}
-                className={styles.avatar}
-              />
+              {student.profile_card ? (
+                <Image
+                  src={
+                    student.profile_card
+                      ? `${apiUrl}${student.profile_card}`
+                      : ""
+                  }
+                  alt="Profile"
+                  preview={false}
+                  className={styles.avatar}
+                />
+              ) : (
+                <Avatar
+                  style={{ backgroundColor: "#4096FF", color: '#ffff',fontSize:'3rem' }}
+                  className={styles.avatar}
+                >
+                  {student.firstname.slice(0,1).toUpperCase()}
+                </Avatar>
+              )}
             </Col>
             <Col xs={24} sm={16} md={18}>
               <Flex justify="space-between" align="flex-start" wrap="wrap">
@@ -96,10 +111,6 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
                 </Tooltip>
               </Flex>
 
-              <Text type="secondary" className={styles.userId}>
-                ID No: AHU59603
-              </Text>
-
               {student.headline && (
                 <Paragraph className={styles.userHeadline}>
                   {student.headline}
@@ -109,7 +120,7 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
               <Divider className={styles.divider} />
 
               <Flex vertical gap="small">
-                <Flex align="center" gap="middle" wrap="wrap">
+                <Flex align="left" gap="middle" wrap="wrap" vertical>
                   <Flex align="center" gap="small" className={styles.infoItem}>
                     <BookOutlined className={styles.infoIcon} />
                     <Text>{student.degree.name}</Text>
@@ -126,7 +137,11 @@ const UserCard: React.FC<ChildProps> = ({ student, fetchUser }) => {
                 <Flex align="center" gap="middle" wrap="wrap">
                   <Flex align="center" gap="small" className={styles.infoItem}>
                     <EnvironmentOutlined className={styles.infoIcon} />
-                    <Text>Chennai</Text>
+                    <Text>
+                      {student.city
+                        ? `${student.city}, ${student.country.iso2}`
+                        : "Not Yet Added"}
+                    </Text>
                   </Flex>
 
                   <Flex align="center" gap="small" className={styles.infoItem}>
