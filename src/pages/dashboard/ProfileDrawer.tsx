@@ -13,7 +13,6 @@ import {
   Select,
   Upload,
   Avatar,
-  message,
   Flex,
 } from "antd";
 import {
@@ -35,6 +34,7 @@ import type { countryType, stateType } from "../../services/countryService";
 import { getCountryPage } from "../../services/countryService";
 import type { UploadChangeParam, RcFile } from "antd/es/upload";
 import { useToast } from '../../hook/useToast';
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
@@ -70,11 +70,11 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const beforeUpload = (file: RcFile) => {
     const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
     if (!isJpgOrPng) {
-      message.error("You can only upload JPG/PNG files!");
+      toast.error("You can only upload JPG/PNG files!");
     }
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
-      message.error("Image must be smaller than 5MB!");
+      toast.error("Image must be smaller than 5MB!");
     }
     return isJpgOrPng && isLt5M;
   };
@@ -93,10 +93,10 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       );
       console.log(response, "response");
       setImageUrl(response.imageUrl);
-      message.success("Profile image uploaded successfully");
+      toast.success("Profile image uploaded successfully");
       return response.imageUrl;
     } catch (error) {
-      message.error("Failed to upload profile image");
+      toast.error("Failed to upload profile image");
       throw error;
     } finally {
       setUploading(false);
