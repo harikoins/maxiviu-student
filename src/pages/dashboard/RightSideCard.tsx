@@ -38,7 +38,7 @@ const RightSideCards: React.FC<ChildProps> = ({
   const documents = [
     { name: "Resume", action: "View" },
     { name: "Marksheets", action: "View" },
-    { name: "Professional Certifications", action: "Upload" },
+    { name: "Professional Certifications", action: "View" },
   ];
 
   return (

@@ -9,10 +9,15 @@ import VideoCard from "./VideoCard";
 import { getstudent, type studentType } from "../../services/studentService";
 import { getEvents, type eventType } from "../../services/eventService";
 import { userSignal } from "../../signals/userSignals";
+import { useOutletContext } from 'react-router-dom';
 
 const { Content } = Layout;
 
+type ContextType = (data: studentType) => void;
+
 const ProfileDashboard: React.FC = () => {
+  const setStudentData = useOutletContext<ContextType>();
+
   const [student, setStudent] = useState<studentType>({} as studentType);
   const [events, setEvents] = useState<eventType[]>([]);
 
@@ -29,6 +34,7 @@ const ProfileDashboard: React.FC = () => {
     }
 
     setStudent(response);
+    setStudentData(response);
   };
 
   useEffect(() => {

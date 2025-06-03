@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Layout, Dropdown, Space, Avatar } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
 import {
@@ -10,11 +10,15 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { clearUser } from "../signals/userSignals";
+import type { studentType } from "../services/studentService";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Header, Content, Footer } = Layout;
 
 const App: React.FC = () => {
   const navigate = useNavigate();
+
+  const [studentData, setStudentData] = useState<studentType | null>(null);
 
   const items: MenuProps["items"] = [
     {
@@ -72,19 +76,32 @@ const App: React.FC = () => {
             style={{ textDecoration: "none", color: "#ffff" }}
           >
             <Space>
-              Sundresh
-              <Avatar
-                size="large"
-                icon={<UserOutlined />}
-                style={{ backgroundColor: "#4096FF" }}
-              />
+              {studentData?.firstname &&
+                `${studentData?.firstname} ${studentData?.lastname}`}
+              {studentData?.profile_card ? (
+                <>
+                  <Avatar
+                    size="large"
+                    src={`${apiUrl}${studentData.profile_card}`} // base64 or image URL
+                  />
+                </>
+              ) : (
+                <>
+                  <Avatar
+                    size="large"
+                    icon={<UserOutlined />}
+                    style={{ backgroundColor: "#4096FF" }}
+                  />
+                </>
+              )}
+
               <DownOutlined />
             </Space>
           </a>
         </Dropdown>
       </Header>
       <Content style={{ padding: "20px" }}>
-        <Outlet />
+        <Outlet context={setStudentData} />
       </Content>
       <Footer style={{ textAlign: "center" }}>
         Maxiviu ©{new Date().getFullYear()} Created by KoInnovation
