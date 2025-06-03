@@ -5,7 +5,7 @@ import Login from "./core/Login.tsx";
 import StudentForm from "./pages/student-form/index.tsx";
 import DashBoard from "./pages/dashboard/index.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { ToastContainer } from "react-toastify";
+import { ToastProvider } from "./hook/useToast.tsx";
 
 function App() {
   const router = createBrowserRouter([
@@ -31,9 +31,9 @@ function App() {
 
   return (
     <>
-      <ToastContainer position="top-left" />
-
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </>
   );
 }

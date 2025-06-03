@@ -31,10 +31,10 @@ import {
   updatestudent,
   uploadProfileImage,
 } from "../../services/studentService";
-import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 import type { countryType, stateType } from "../../services/countryService";
 import { getCountryPage } from "../../services/countryService";
 import type { UploadChangeParam, RcFile } from "antd/es/upload";
+import { useToast } from '../../hook/useToast';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
@@ -60,6 +60,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   student,
   fetchUser,
 }) => {
+  const toast = useToast();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -156,7 +157,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to fetch API data:", error);
-      showErrorToast(error.message || "An unexpected error occurred.");
+      toast.error(error.message || "An unexpected error occurred.");
     }
   }
 
@@ -208,12 +209,12 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     };
     try {
       await updatestudent(student.id, payload);
-      showSuccessToast("Profile Updated Successfully");
+      toast.success("Profile Updated Successfully");
       fetchUser();
       onClose();
     } catch (error) {
       console.error("Error updating profile:", error);
-      showErrorToast("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }

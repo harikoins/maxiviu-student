@@ -15,7 +15,6 @@ import {
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { studentType } from "../../services/studentService";
-import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 import { createBulkInternship } from "../../services/internshipService";
 import {
   createBulkSoftSkill,
@@ -26,7 +25,7 @@ import {
   type technicalSkillType,
 } from "../../services/technicalskillService";
 import { createBulkCertificate } from "../../services/certificationService";
-
+import { useToast } from '../../hook/useToast';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Option } = Select;
@@ -46,6 +45,7 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
   fetchUser,
   student,
 }) => {
+  const toast = useToast();
   const [form] = Form.useForm();
   const screens = useBreakpoint();
 
@@ -267,12 +267,12 @@ const SkillsDrawer: React.FC<SkillsDrawerProps> = ({
       const hasError = responses.some((res) => res?.success === false);
       if (hasError) throw new Error("Some data could not be saved");
 
-      showSuccessToast("Skills data saved successfully!");
+      toast.success("Skills data saved successfully!");
       handleClose();
       fetchUser();
     } catch (error) {
       console.error("Error saving skills data:", error);
-      showErrorToast("Failed to save skills data. Please try again.");
+      toast.error("Failed to save skills data. Please try again.");
     }
   };
 

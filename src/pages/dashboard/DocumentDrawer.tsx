@@ -21,8 +21,8 @@ import {
 } from "@ant-design/icons";
 import type { UploadProps } from "antd";
 import { createdocument } from "../../services/documentService";
-import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 import type { studentType } from "../../services/studentService";
+import { useToast } from '../../hook/useToast';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title, Text } = Typography;
@@ -46,6 +46,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
   handleClose,
   student,
 }) => {
+  const toast = useToast();
   const [marksheets, setMarksheets] = useState<DocumentItem[]>([]);
 
   const [certificates, setCertificates] = useState<DocumentItem[]>([]);
@@ -159,7 +160,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
           setCertificates(certificateItems);
         } catch (error) {
           console.error("Error loading documents", error);
-          showErrorToast("Failed to load documents");
+          toast.error("Failed to load documents");
         }
       }
     };
@@ -199,7 +200,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
         });
       }
 
-      showSuccessToast(`${file.name} uploaded successfully`);
+      toast.success(`${file.name} uploaded successfully`);
     }
   };
 
@@ -237,11 +238,11 @@ const DocumentDrawer: React.FC<DrawerType> = ({
       const fileURL = typeof item.file === "string" ? item.file : URL.createObjectURL(item.file);
       window.open(fileURL, "_blank", "noopener,noreferrer");
     } else {
-      showErrorToast("File not available for preview");
+      toast.error("File not available for preview");
     }
   } catch (error) {
     console.error("Error previewing file:", error);
-    showErrorToast("Failed to preview file");
+    toast.error("Failed to preview file");
   }
 };
 
@@ -258,7 +259,7 @@ const DocumentDrawer: React.FC<DrawerType> = ({
     const hasEmptyResume = !resume?.file;
 
     if (hasEmptyMarksheet || hasEmptyCertificate || hasEmptyResume) {
-      showErrorToast("Please upload all required documents before saving");
+      toast.error("Please upload all required documents before saving");
       return;
     }
 
@@ -301,12 +302,12 @@ const DocumentDrawer: React.FC<DrawerType> = ({
 
     try {
       await createdocument(formData,`uploads/${student.firstname} ${student.lastname}/documents`);
-      showSuccessToast("Documents uploaded successfully");
+      toast.success("Documents uploaded successfully");
       handleClose();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.log(error, "error");
-      showErrorToast("Error uploading documents");
+      toast.error("Error uploading documents");
     }
   };
 

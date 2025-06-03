@@ -120,7 +120,7 @@ const VideoCard: React.FC = () => {
               customRequest={({ file, onSuccess }) => {
                 setTimeout(() => {
                   onSuccess?.("ok");
-                  handleUpload({ file: { status: 'done', name: file?.name, originFileObj: file } });
+                  handleUpload({ file: { status: 'done', name: file ?? "", originFileObj: file } });
                 }, 0);
               }}
               showUploadList={false}

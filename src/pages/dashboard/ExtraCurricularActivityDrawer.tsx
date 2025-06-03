@@ -20,9 +20,9 @@ import {
   EyeOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { showErrorToast, showSuccessToast } from "../../utils/toaster";
 import type { studentType } from "../../services/studentService";
 import { createBulkExtracurricularActivity } from "../../services/extracurricularActivityService";
+import { useToast } from '../../hook/useToast';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
@@ -50,6 +50,7 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
   student,
   fetchUser,
 }) => {
+  const toast = useToast();
   const [formList, setFormList] = useState<ActivityData[]>([
     {
       category: "",
@@ -237,7 +238,7 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
         !proj.category || !proj.skill || !proj.description || !proj.achievement
     );
     if (hasEmptyFields) {
-      showErrorToast("Please fill in all fields for every activity.");
+      toast.error("Please fill in all fields for every activity.");
       return;
     }
 
@@ -285,7 +286,7 @@ const ExtraCurricularActivityDrawer: React.FC<ChildProps> = ({
 
     console.log(activityDatas, "activityDatas");
     await fetchUser();
-    showSuccessToast("All activities submitted successfully!");
+    toast.success("All activities submitted successfully!");
     handleClose();
   };
 

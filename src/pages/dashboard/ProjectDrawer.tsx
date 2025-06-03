@@ -18,9 +18,9 @@ import {
   EyeOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { showErrorToast, showSuccessToast } from "../../utils/toaster";
 import type { studentType } from "../../services/studentService";
 import { createBulkProject } from "../../services/projectService";
+import { useToast } from '../../hook/useToast';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
@@ -49,6 +49,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
   student,
   fetchUser,
 }) => {
+  const toast = useToast();
   const [formList, setFormList] = useState<ProjectData[]>([
     {
       name: "",
@@ -201,7 +202,7 @@ const ProjectDrawer: React.FC<ChildProps> = ({
         !proj.sourcecodelink
     );
     if (hasEmptyFields) {
-      showErrorToast("Please fill in all fields for every project.");
+      toast.error("Please fill in all fields for every project.");
       return;
     }
 
@@ -250,7 +251,8 @@ const ProjectDrawer: React.FC<ChildProps> = ({
 
     await createBulkProject(projectFormData,`uploads/${student.firstname} ${student.lastname}/projects`);
     await fetchUser();
-    showSuccessToast("All projects submitted successfully!");
+ 
+    toast.success('All projects submitted successfully');
     handleProjectClose();
   };
 

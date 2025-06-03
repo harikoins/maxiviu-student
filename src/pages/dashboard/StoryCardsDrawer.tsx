@@ -1,8 +1,8 @@
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 import React, { useEffect } from "react";
 import { updatestudent } from "../../services/studentService";
-import { showSuccessToast, showErrorToast } from "../../utils/toaster";
 import type { studentType } from "../../services/studentService";
+import { useToast } from '../../hook/useToast';
 
 // Define props interface for the component
 interface StoryCardsDrawerProps {
@@ -20,6 +20,7 @@ const StoryCardsDrawer: React.FC<StoryCardsDrawerProps> = ({
   type,
   fetchUser
 }) => {
+  const toast = useToast();
   const [form] = Form.useForm();
 
   // Update form values when drawer opens or data changes
@@ -35,11 +36,11 @@ const StoryCardsDrawer: React.FC<StoryCardsDrawerProps> = ({
   const onFinish = async (values: Record<string, string>) => {
     try {
       await updatestudent(student.id, { ...student, ...values });
-      showSuccessToast("Student Details Updated Successfully.");
+      toast.success("Student Details Updated Successfully.");
       fetchUser();
       onClose();
     } catch (error) {
-      showErrorToast("Failed to update student details. Please try again.");
+      toast.error("Failed to update student details. Please try again.");
       console.error("Update Error:", error);
     }
   };

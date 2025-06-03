@@ -1,6 +1,7 @@
 import axios, { AxiosError, type AxiosResponse } from "axios";
-import { toast } from "react-toastify";
 import type { userType } from "../services/userService";
+import { showError } from "../hook/toastHelper";
+
 // Create an instance with default settings
 const axiosInstance = axios.create({
   baseURL: "http://localhost:3900/v1/student/", // Default base URL
@@ -45,28 +46,28 @@ axiosInstance.interceptors.response.use(
         // Case: Array of errors
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         errorData.forEach((err: any) => {
-          toast.error(typeof err === "string" ? err : JSON.stringify(err));
+          showError(typeof err === "string" ? err : JSON.stringify(err));
         });
       } else if (typeof errorData === "string") {
         // Case: Single string message
-        toast.error(errorData);
+        showError(errorData);
       } else if (typeof errorData === "object") {
         // Case: Object of errors (e.g., field-based)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Object.values(errorData).forEach((val: any) => {
           if (Array.isArray(val)) {
-            val.forEach((msg) => toast.error(msg));
+            val.forEach((msg) => showError(msg));
           } else {
-            toast.error(val);
+            showError(val);
           }
         });
       } else {
         // Fallback
-        toast.error("Unexpected error format.");
+        showError("Unexpected error format.");
       }
     } else {
       // Handle other status codes (optional)
-      toast.error(response?.data?.message || "An unexpected error occurred.");
+      showError(response?.data?.message || "An unexpected error occurred.");
     }
     return Promise.reject(error);
   }
