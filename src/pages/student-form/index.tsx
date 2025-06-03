@@ -9,11 +9,12 @@ import { getdepartmentPage } from "../../services/departmentService";
 import { getdegreePage } from "../../services/degreeService";
 import { createstudent } from "../../services/studentService";
 import { useNavigate } from "react-router-dom";
-import { showSuccessToast, showErrorToast } from "../../utils/toaster";
+import { useToast } from '../../hook/useToast';
 
 const { Step } = Steps;
 
 const StudentForm: React.FC = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   interface dropdownType {
     courses: {
@@ -72,7 +73,7 @@ const StudentForm: React.FC = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to fetch API data:", error);
-      showErrorToast(error.message || "An unexpected error occurred.");
+      toast.error(error.message || "An unexpected error occurred.");
     }
   }
 
@@ -411,13 +412,13 @@ const StudentForm: React.FC = () => {
             });
           }
           navigate(`/dashboard`);
-          showSuccessToast("Submitted Successfully.");
+          toast.success("Submitted Successfully.");
         } else {
-          showErrorToast("An unexpected error occurred. Please try again.");
+          toast.error("An unexpected error occurred. Please try again.");
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        showErrorToast(error?.message || "An unexpected error occurred.");
+        toast.error(error?.message || "An unexpected error occurred.");
       }
     }
   };
